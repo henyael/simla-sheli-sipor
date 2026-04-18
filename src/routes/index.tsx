@@ -284,6 +284,7 @@ function Home() {
           title={story.title}
           pages={story.pages}
           autoMusic={withMusic}
+          withImages={withImages}
           onClose={() => setReading(false)}
           key={withTTS ? "tts" : "no-tts"}
         />
