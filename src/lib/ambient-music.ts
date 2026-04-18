@@ -113,6 +113,8 @@ export async function startAmbientMusic(volume = 0.12): Promise<boolean> {
   noise.start();
 
   nodes.push({ stop: () => noise.stop() });
+
+  return true;
 }
 
 export function stopAmbientMusic() {
