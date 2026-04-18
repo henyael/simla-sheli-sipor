@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      stories: {
+        Row: {
+          child_name: string
+          created_at: string
+          device_id: string
+          id: string
+          length: string
+          pages: Json
+          sentiment: string
+          title: string
+          topic: string
+        }
+        Insert: {
+          child_name: string
+          created_at?: string
+          device_id: string
+          id?: string
+          length: string
+          pages: Json
+          sentiment: string
+          title: string
+          topic: string
+        }
+        Update: {
+          child_name?: string
+          created_at?: string
+          device_id?: string
+          id?: string
+          length?: string
+          pages?: Json
+          sentiment?: string
+          title?: string
+          topic?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
