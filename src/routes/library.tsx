@@ -52,8 +52,9 @@ function LibraryPage() {
   };
 
   return (
-    <div className="relative min-h-screen">
+    <div dir="rtl" className="relative min-h-screen">
       <div className="starfield" />
+      <div className="cosmic-moon" aria-hidden />
       <div className="relative z-10 mx-auto max-w-2xl px-5 py-10 sm:py-16">
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-display text-3xl sm:text-4xl text-primary">

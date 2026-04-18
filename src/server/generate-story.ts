@@ -6,15 +6,16 @@ const inputSchema = z.object({
   topic: z.string().trim().min(1).max(200),
   length: z.enum(["short", "medium", "long"]),
   sentiment: z.enum(["magical", "inspiring", "learning"]),
+  withImages: z.boolean().optional().default(false),
 });
 
-export type StoryPage = { text: string };
+export type StoryPage = { text: string; image_url?: string };
 export type StoryResult = { title: string; pages: StoryPage[] };
 
 const lengthSpec: Record<string, { pages: string; words: string }> = {
-  short: { pages: "5-6 עמודים", words: "כ-250 מילים סה״כ" },
-  medium: { pages: "8-10 עמודים", words: "כ-450 מילים סה״כ" },
-  long: { pages: "12-14 עמודים", words: "כ-700 מילים סה״כ (כ-3 דקות קריאה)" },
+  short: { pages: "5-7 עמודים", words: "כ-250-400 מילים (1-3 דקות קריאה)" },
+  medium: { pages: "9-12 עמודים", words: "כ-500-750 מילים (3-5 דקות קריאה)" },
+  long: { pages: "14-18 עמודים", words: "כ-900-1500 מילים (5-10 דקות קריאה)" },
 };
 
 const sentimentSpec: Record<string, string> = {
@@ -22,6 +23,51 @@ const sentimentSpec: Record<string, string> = {
   inspiring: "מעורר השראה ומחזק ביטחון עצמי",
   learning: "עם לקח עדין על חברות, אומץ או טוב לב",
 };
+
+async function generatePageImage(
+  apiKey: string,
+  pageText: string,
+  storyTitle: string,
+): Promise<string | undefined> {
+  try {
+    const prompt = `Soft dreamy watercolor illustration for a children's bedtime book.
+Story: "${storyTitle}".
+Scene: ${pageText}
+Style: gentle pastel watercolor, soft glowing moon and tiny stars, calm bedtime mood,
+deep indigo and lavender night palette with warm amber accents, no text, no letters,
+storybook illustration, cozy and peaceful.`;
+
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-image",
+        messages: [{ role: "user", content: prompt }],
+        modalities: ["image", "text"],
+      }),
+    });
+
+    if (!res.ok) {
+      console.error("Image gen failed", res.status, await res.text());
+      return undefined;
+    }
+
+    const json = (await res.json()) as {
+      choices?: Array<{
+        message?: {
+          images?: Array<{ image_url?: { url?: string } }>;
+        };
+      }>;
+    };
+    return json.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+  } catch (err) {
+    console.error("Image gen error", err);
+    return undefined;
+  }
+}
 
 export const generateStory = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => inputSchema.parse(input))
@@ -137,6 +183,17 @@ export const generateStory = createServerFn({ method: "POST" })
 
     if (!parsed.title || !Array.isArray(parsed.pages) || parsed.pages.length === 0) {
       throw new Error("הסיפור שהוחזר ריק. נסו שוב.");
+    }
+
+    // Optionally generate one watercolor illustration per page in parallel.
+    if (data.withImages) {
+      const images = await Promise.all(
+        parsed.pages.map((p) => generatePageImage(apiKey, p.text, parsed.title)),
+      );
+      parsed.pages = parsed.pages.map((p, i) => ({
+        ...p,
+        image_url: images[i],
+      }));
     }
 
     return parsed satisfies StoryResult;
