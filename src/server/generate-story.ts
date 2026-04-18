@@ -35,14 +35,29 @@ async function generatePageImage(
   apiKey: string,
   pageText: string,
   storyTitle: string,
+  styleAnchor: string,
 ): Promise<string | undefined> {
   try {
-    const prompt = `Soft dreamy watercolor illustration for a children's bedtime book.
-Story: "${storyTitle}".
-Scene: ${pageText}
-Style: gentle pastel watercolor, soft glowing moon and tiny stars, calm bedtime mood,
-deep indigo and lavender night palette with warm amber accents, no text, no letters,
-storybook illustration, cozy and peaceful.`;
+    // The style block is IDENTICAL on every page so the model produces
+    // visually consistent illustrations across the whole story.
+    const STYLE_BIBLE = `ILLUSTRATION STYLE (must stay identical across every page of this book):
+- Medium: soft pastel watercolor, gentle paper grain, hand-painted bedtime storybook.
+- Palette: deep indigo & lavender night sky, warm amber/cream highlights, soft pink moonlight, dusty teal shadows. Never use neon, never high-saturation, never harsh black.
+- Lighting: a single soft glowing crescent moon, tiny twinkling stars, dreamy haze.
+- Mood: cozy, peaceful, magical, sleepy. Calm faces, half-closed eyes, gentle smiles.
+- Composition: centered subject, generous soft background, square format, painterly soft edges.
+- ABSOLUTELY NO text, letters, numbers, words, captions, signatures, or watermarks anywhere in the image.
+- Same artistic hand throughout the book — like one illustrator drew all pages.`;
+
+    const prompt = `${STYLE_BIBLE}
+
+STORY-SPECIFIC ANCHOR (keep these characters/setting consistent every page):
+${styleAnchor}
+
+BOOK TITLE: "${storyTitle}"
+SCENE TO ILLUSTRATE FOR THIS PAGE: ${pageText}
+
+Paint this scene now in the exact style described above, matching the story-specific anchor.`;
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -51,7 +66,8 @@ storybook illustration, cozy and peaceful.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        // Faster preview model — pro-level quality with much lower latency
+        model: "google/gemini-3.1-flash-image-preview",
         messages: [{ role: "user", content: prompt }],
         modalities: ["image", "text"],
       }),
