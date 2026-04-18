@@ -285,6 +285,7 @@ function Home() {
           pages={story.pages}
           autoMusic={withMusic}
           withImages={withImages}
+          styleAnchor={`Main character: a child named ${childName.trim()}. Story idea: ${topic.trim()}. Keep this same character's appearance (clothing, hair, body) on every page.`}
           onClose={() => setReading(false)}
           key={withTTS ? "tts" : "no-tts"}
         />

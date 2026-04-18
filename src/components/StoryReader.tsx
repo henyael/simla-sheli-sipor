@@ -14,6 +14,8 @@ interface StoryReaderProps {
   autoMusic?: boolean;
   /** Generate watercolor illustrations per page in the background. */
   withImages?: boolean;
+  /** Shared style anchor sent with every illustration request so all pages match. */
+  styleAnchor?: string;
 }
 
 export function StoryReader({
@@ -22,6 +24,7 @@ export function StoryReader({
   onClose,
   autoMusic = false,
   withImages = false,
+  styleAnchor = "",
 }: StoryReaderProps) {
   const [page, setPage] = useState(0);
   const [music, setMusic] = useState(false);
@@ -39,18 +42,33 @@ export function StoryReader({
     setImages({});
   }, [pages]);
 
-  // Generate illustrations one-by-one in the background so each request
-  // stays well under the Worker timeout. Page 0 first so it shows fastest.
+  // Generate illustrations in the background. We do up to 2 in parallel so
+  // page 1 has its image ready by the time the parent finishes reading page 0,
+  // but we never blast the gateway with all pages at once (which would
+  // re-introduce the Worker timeout).
   useEffect(() => {
     if (!withImages) return;
     let cancelled = false;
-    (async () => {
-      for (let i = 0; i < pages.length; i++) {
-        if (cancelled) return;
-        if (pages[i].image_url) continue;
+
+    const queue = pages
+      .map((p, i) => ({ i, p }))
+      .filter(({ p }) => !p.image_url);
+    let cursor = 0;
+    const CONCURRENCY = 2;
+
+    const runOne = async () => {
+      while (!cancelled) {
+        const idx = cursor++;
+        if (idx >= queue.length) return;
+        const { i, p } = queue[idx];
         try {
           const res = await generateImage({
-            data: { pageText: pages[i].text, storyTitle: title },
+            data: {
+              pageText: p.text,
+              storyTitle: title,
+              styleAnchor:
+                styleAnchor || `Bedtime story titled "${title}". Keep the same character design across every page.`,
+            },
           });
           if (cancelled) return;
           if (res.image_url) {
@@ -60,12 +78,26 @@ export function StoryReader({
           console.warn("Illustration failed for page", i, err);
         }
       }
-    })();
+    };
+
+    void Promise.all(Array.from({ length: CONCURRENCY }, runOne));
+
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pages, withImages, title]);
+  }, [pages, withImages, title, styleAnchor]);
+
+  // Prefetch the next page's image into the browser cache so flipping is
+  // instant once it's been generated.
+  useEffect(() => {
+    const nextUrl =
+      pages[page + 1]?.image_url ?? images[page + 1];
+    if (nextUrl && typeof window !== "undefined") {
+      const img = new Image();
+      img.src = nextUrl;
+    }
+  }, [page, images, pages]);
 
   // Try to start music on the first user interaction inside the reader
   // (browsers block AudioContext without a real user gesture).
