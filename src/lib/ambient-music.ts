@@ -19,15 +19,38 @@ const NOTES_HZ = [
   261.63, // C4
 ];
 
-export function startAmbientMusic(volume = 0.12) {
-  if (ctx) return; // already playing
+export async function startAmbientMusic(volume = 0.12): Promise<boolean> {
+  if (ctx) {
+    // Already created — make sure it's actually running (browsers may auto-suspend).
+    if (ctx.state === "suspended") {
+      try {
+        await ctx.resume();
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  }
 
   const Ctor =
     (window as unknown as { AudioContext?: typeof AudioContext }).AudioContext ??
     (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!Ctor) return;
+  if (!Ctor) return false;
 
   ctx = new Ctor();
+
+  // Browsers require a user gesture to start audio. If we were called from
+  // a real click handler this resume() succeeds; otherwise the play call is
+  // silently dropped. We surface failure so the UI can stay in "off" state.
+  if (ctx.state === "suspended") {
+    try {
+      await ctx.resume();
+    } catch {
+      ctx = null;
+      return false;
+    }
+  }
+
   master = ctx.createGain();
   master.gain.value = 0;
   master.connect(ctx.destination);
@@ -90,6 +113,8 @@ export function startAmbientMusic(volume = 0.12) {
   noise.start();
 
   nodes.push({ stop: () => noise.stop() });
+
+  return true;
 }
 
 export function stopAmbientMusic() {
