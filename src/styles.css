@@ -147,10 +147,9 @@
   body {
     background:
       radial-gradient(ellipse at 20% 0%, oklch(0.35 0.1 295 / 0.55), transparent 55%),
-      radial-gradient(ellipse at 80% 100%, oklch(0.32 0.12 250 / 0.5), transparent 60%),
-      var(--color-background);
+      radial-gradient(ellipse at 80% 100%, oklch(0.32 0.12 250 / 0.5), transparent 60%), var(--color-background);
     color: var(--color-foreground);
-    font-family: "Heebo", system-ui, sans-serif;
+    font-family: "Arial", system-ui, sans-serif;
     min-height: 100vh;
   }
 
@@ -162,8 +161,13 @@
 
 /* Twinkling stars background */
 @keyframes twinkle {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .starfield {
@@ -172,22 +176,23 @@
   pointer-events: none;
   z-index: 0;
   background-image:
-    radial-gradient(1px 1px at 12% 22%, white, transparent),
-    radial-gradient(1px 1px at 28% 78%, white, transparent),
+    radial-gradient(1px 1px at 12% 22%, white, transparent), radial-gradient(1px 1px at 28% 78%, white, transparent),
     radial-gradient(1.5px 1.5px at 47% 35%, white, transparent),
-    radial-gradient(1px 1px at 63% 12%, white, transparent),
-    radial-gradient(1px 1px at 81% 65%, white, transparent),
-    radial-gradient(1.5px 1.5px at 91% 28%, white, transparent),
-    radial-gradient(1px 1px at 7% 88%, white, transparent),
-    radial-gradient(1px 1px at 38% 92%, white, transparent),
-    radial-gradient(1px 1px at 72% 48%, white, transparent);
+    radial-gradient(1px 1px at 63% 12%, white, transparent), radial-gradient(1px 1px at 81% 65%, white, transparent),
+    radial-gradient(1.5px 1.5px at 91% 28%, white, transparent), radial-gradient(1px 1px at 7% 88%, white, transparent),
+    radial-gradient(1px 1px at 38% 92%, white, transparent), radial-gradient(1px 1px at 72% 48%, white, transparent);
   opacity: 0.6;
   animation: twinkle 6s ease-in-out infinite;
 }
 
 @keyframes float-slow {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .float-slow {
@@ -195,8 +200,14 @@
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fade-up {
