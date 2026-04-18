@@ -11,6 +11,9 @@ const inputSchema = z.object({
 const imageInputSchema = z.object({
   pageText: z.string().trim().min(1).max(2000),
   storyTitle: z.string().trim().min(1).max(200),
+  // A short shared "style bible" for the whole story — same wording
+  // is used on every page so all illustrations feel like one book.
+  styleAnchor: z.string().trim().min(1).max(600),
 });
 
 export type StoryPage = { text: string; image_url?: string };
