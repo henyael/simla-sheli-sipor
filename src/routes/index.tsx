@@ -123,9 +123,11 @@ function Home() {
           </p>
           <Link
             to="/library"
-            className="inline-block mt-4 text-sm text-accent hover:underline smooth"
+            className="group relative inline-flex items-center gap-2 mt-5 px-5 py-2.5 rounded-full border border-accent/40 bg-accent/10 text-accent font-medium text-sm smooth hover:bg-accent/20 hover:border-accent/70 hover:scale-105 hover:shadow-[0_0_25px_oklch(0.78_0.14_250/0.4)] active:scale-95"
           >
-            הספרייה שלי 📚
+            <span className="text-base group-hover:rotate-6 smooth inline-block">📚</span>
+            <span>הספרייה שלי</span>
+            <span className="text-xs opacity-70 group-hover:-translate-x-1 smooth inline-block">←</span>
           </Link>
         </header>
 
