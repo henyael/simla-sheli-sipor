@@ -81,15 +81,16 @@ function Home() {
 
       // Save to library (best-effort, no auth)
       const sb = getDeviceSupabase();
-      await sb.from("stories").insert({
+      const insertRow = {
         device_id: localStorage.getItem("bedtime.device_id") ?? "",
         child_name: childName.trim(),
         topic: topic.trim(),
-        length,
-        sentiment,
+        length: length as string,
+        sentiment: sentiment as string,
         title: result.title,
-        pages: result.pages as unknown as object,
-      });
+        pages: result.pages as unknown,
+      };
+      await sb.from("stories").insert(insertRow as never);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "שגיאה לא ידועה";
       setError(msg);
