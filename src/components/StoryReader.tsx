@@ -181,16 +181,20 @@ export function StoryReader({
             key={page}
             className="page-in flex-1 flex flex-col items-center justify-center text-center gap-6"
           >
-            {current?.image_url && (
+            {currentImage ? (
               <div className="w-full max-w-sm rounded-2xl overflow-hidden shadow-xl border border-border/50 bg-background/40">
                 <img
-                  src={current.image_url}
+                  src={currentImage}
                   alt=""
                   className="w-full h-auto block"
                   loading="lazy"
                 />
               </div>
-            )}
+            ) : withImages ? (
+              <div className="w-full max-w-sm aspect-square rounded-2xl border border-border/50 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-muted-foreground text-sm animate-pulse">
+                ✨ מציירים…
+              </div>
+            ) : null}
 
             <p className="story-text text-foreground/95 px-1">
               {current?.text}
