@@ -82,7 +82,6 @@ function Home() {
           topic: topic.trim(),
           length,
           sentiment,
-          withImages,
         },
       });
       setStory(result);
