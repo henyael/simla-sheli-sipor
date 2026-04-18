@@ -6,7 +6,11 @@ const inputSchema = z.object({
   topic: z.string().trim().min(1).max(200),
   length: z.enum(["short", "medium", "long"]),
   sentiment: z.enum(["magical", "inspiring", "learning"]),
-  withImages: z.boolean().optional().default(false),
+});
+
+const imageInputSchema = z.object({
+  pageText: z.string().trim().min(1).max(2000),
+  storyTitle: z.string().trim().min(1).max(200),
 });
 
 export type StoryPage = { text: string; image_url?: string };
