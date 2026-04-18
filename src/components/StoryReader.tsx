@@ -2,11 +2,7 @@ import { useEffect, useState } from "react";
 import type { StoryPage } from "@/server/generate-story";
 import { Button } from "@/components/ui/button";
 import { speak, stopSpeaking, isTTSAvailable } from "@/lib/tts";
-import {
-  startAmbientMusic,
-  stopAmbientMusic,
-  isAmbientPlaying,
-} from "@/lib/ambient-music";
+import { startAmbientMusic, stopAmbientMusic } from "@/lib/ambient-music";
 
 interface StoryReaderProps {
   title: string;
