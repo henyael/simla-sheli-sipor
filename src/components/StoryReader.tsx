@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import type { StoryPage } from "@/server/generate-story";
+import { generatePageIllustration } from "@/server/generate-story";
 import { Button } from "@/components/ui/button";
 import { speak, stopSpeaking, isTTSAvailable } from "@/lib/tts";
 import { startAmbientMusic, stopAmbientMusic } from "@/lib/ambient-music";
@@ -10,6 +12,8 @@ interface StoryReaderProps {
   onClose: () => void;
   /** Auto-start ambient music when the reader opens. */
   autoMusic?: boolean;
+  /** Generate watercolor illustrations per page in the background. */
+  withImages?: boolean;
 }
 
 export function StoryReader({
@@ -17,18 +21,51 @@ export function StoryReader({
   pages,
   onClose,
   autoMusic = false,
+  withImages = false,
 }: StoryReaderProps) {
   const [page, setPage] = useState(0);
   const [music, setMusic] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [images, setImages] = useState<Record<number, string>>({});
+  const generateImage = useServerFn(generatePageIllustration);
   const total = pages.length;
   const isLast = page === total - 1;
   const current = pages[page];
+  const currentImage = current?.image_url ?? images[page];
   const ttsAvailable = isTTSAvailable();
 
   useEffect(() => {
     setPage(0);
+    setImages({});
   }, [pages]);
+
+  // Generate illustrations one-by-one in the background so each request
+  // stays well under the Worker timeout. Page 0 first so it shows fastest.
+  useEffect(() => {
+    if (!withImages) return;
+    let cancelled = false;
+    (async () => {
+      for (let i = 0; i < pages.length; i++) {
+        if (cancelled) return;
+        if (pages[i].image_url) continue;
+        try {
+          const res = await generateImage({
+            data: { pageText: pages[i].text, storyTitle: title },
+          });
+          if (cancelled) return;
+          if (res.image_url) {
+            setImages((prev) => ({ ...prev, [i]: res.image_url as string }));
+          }
+        } catch (err) {
+          console.warn("Illustration failed for page", i, err);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pages, withImages, title]);
 
   // Try to start music on the first user interaction inside the reader
   // (browsers block AudioContext without a real user gesture).
