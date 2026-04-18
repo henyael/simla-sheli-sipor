@@ -6,7 +6,11 @@ const inputSchema = z.object({
   topic: z.string().trim().min(1).max(200),
   length: z.enum(["short", "medium", "long"]),
   sentiment: z.enum(["magical", "inspiring", "learning"]),
-  withImages: z.boolean().optional().default(false),
+});
+
+const imageInputSchema = z.object({
+  pageText: z.string().trim().min(1).max(2000),
+  storyTitle: z.string().trim().min(1).max(200),
 });
 
 export type StoryPage = { text: string; image_url?: string };
@@ -185,16 +189,19 @@ export const generateStory = createServerFn({ method: "POST" })
       throw new Error("הסיפור שהוחזר ריק. נסו שוב.");
     }
 
-    // Optionally generate one watercolor illustration per page in parallel.
-    if (data.withImages) {
-      const images = await Promise.all(
-        parsed.pages.map((p) => generatePageImage(apiKey, p.text, parsed.title)),
-      );
-      parsed.pages = parsed.pages.map((p, i) => ({
-        ...p,
-        image_url: images[i],
-      }));
-    }
-
     return parsed satisfies StoryResult;
+  });
+
+// Separate server function: generate ONE page illustration. Called from the
+// client per page (in parallel with limited concurrency) so each request stays
+// under the Worker timeout instead of one giant blocking call.
+export const generatePageIllustration = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => imageInputSchema.parse(input))
+  .handler(async ({ data }) => {
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
+    const url = await generatePageImage(apiKey, data.pageText, data.storyTitle);
+    return { image_url: url };
   });

@@ -82,7 +82,6 @@ function Home() {
           topic: topic.trim(),
           length,
           sentiment,
-          withImages,
         },
       });
       setStory(result);
@@ -285,6 +284,7 @@ function Home() {
           title={story.title}
           pages={story.pages}
           autoMusic={withMusic}
+          withImages={withImages}
           onClose={() => setReading(false)}
           key={withTTS ? "tts" : "no-tts"}
         />
