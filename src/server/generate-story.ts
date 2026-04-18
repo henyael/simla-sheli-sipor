@@ -221,6 +221,11 @@ export const generatePageIllustration = createServerFn({ method: "POST" })
     if (!apiKey) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
-    const url = await generatePageImage(apiKey, data.pageText, data.storyTitle);
+    const url = await generatePageImage(
+      apiKey,
+      data.pageText,
+      data.storyTitle,
+      data.styleAnchor,
+    );
     return { image_url: url };
   });
