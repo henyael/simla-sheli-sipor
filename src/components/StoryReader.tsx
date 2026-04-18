@@ -34,13 +34,21 @@ export function StoryReader({
     setPage(0);
   }, [pages]);
 
-  // Auto-start music once on open if requested
+  // Try to start music on the first user interaction inside the reader
+  // (browsers block AudioContext without a real user gesture).
   useEffect(() => {
-    if (autoMusic && !isAmbientPlaying()) {
-      startAmbientMusic();
-      setMusic(true);
-    }
+    if (!autoMusic) return;
+    const tryStart = async () => {
+      const ok = await startAmbientMusic();
+      if (ok) setMusic(true);
+      window.removeEventListener("pointerdown", tryStart);
+      window.removeEventListener("keydown", tryStart);
+    };
+    window.addEventListener("pointerdown", tryStart, { once: true });
+    window.addEventListener("keydown", tryStart, { once: true });
     return () => {
+      window.removeEventListener("pointerdown", tryStart);
+      window.removeEventListener("keydown", tryStart);
       stopAmbientMusic();
       stopSpeaking();
     };
@@ -53,13 +61,17 @@ export function StoryReader({
     setSpeaking(false);
   }, [page]);
 
-  const toggleMusic = () => {
+  const toggleMusic = async () => {
     if (music) {
       stopAmbientMusic();
       setMusic(false);
     } else {
-      startAmbientMusic();
-      setMusic(true);
+      // This runs inside a click handler — the gesture browsers require.
+      const ok = await startAmbientMusic();
+      setMusic(ok);
+      if (!ok) {
+        console.warn("Ambient music could not start (browser blocked audio).");
+      }
     }
   };
 
