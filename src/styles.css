@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import url("https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&family=Frank+Ruhl+Libre:wght@500;700;900&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -62,26 +63,27 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --radius: 1.25rem;
+  /* Soft night-sky palette: deep indigo with lavender starlight */
+  --background: oklch(0.22 0.05 280);
+  --foreground: oklch(0.96 0.02 290);
+  --card: oklch(0.27 0.06 282 / 0.7);
+  --card-foreground: oklch(0.96 0.02 290);
+  --popover: oklch(0.25 0.06 282);
+  --popover-foreground: oklch(0.96 0.02 290);
+  --primary: oklch(0.78 0.13 295);
+  --primary-foreground: oklch(0.22 0.06 280);
+  --secondary: oklch(0.32 0.07 285);
+  --secondary-foreground: oklch(0.96 0.02 290);
+  --muted: oklch(0.3 0.05 282);
+  --muted-foreground: oklch(0.78 0.04 285);
+  --accent: oklch(0.7 0.14 250);
+  --accent-foreground: oklch(0.16 0.04 280);
+  --destructive: oklch(0.65 0.2 25);
+  --destructive-foreground: oklch(0.98 0.01 285);
+  --border: oklch(0.96 0.02 290 / 0.12);
+  --input: oklch(0.96 0.02 290 / 0.1);
+  --ring: oklch(0.78 0.13 295 / 0.6);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -137,8 +139,66 @@
     border-color: var(--color-border);
   }
 
+  html,
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    direction: rtl;
   }
+
+  body {
+    background:
+      radial-gradient(ellipse at 20% 0%, oklch(0.35 0.1 295 / 0.55), transparent 55%),
+      radial-gradient(ellipse at 80% 100%, oklch(0.32 0.12 250 / 0.5), transparent 60%),
+      var(--color-background);
+    color: var(--color-foreground);
+    font-family: "Heebo", system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  .font-display {
+    font-family: "Frank Ruhl Libre", "Heebo", serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Twinkling stars background */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+.starfield {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, white, transparent),
+    radial-gradient(1px 1px at 28% 78%, white, transparent),
+    radial-gradient(1.5px 1.5px at 47% 35%, white, transparent),
+    radial-gradient(1px 1px at 63% 12%, white, transparent),
+    radial-gradient(1px 1px at 81% 65%, white, transparent),
+    radial-gradient(1.5px 1.5px at 91% 28%, white, transparent),
+    radial-gradient(1px 1px at 7% 88%, white, transparent),
+    radial-gradient(1px 1px at 38% 92%, white, transparent),
+    radial-gradient(1px 1px at 72% 48%, white, transparent);
+  opacity: 0.6;
+  animation: twinkle 6s ease-in-out infinite;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fade-up 0.5s ease-out both;
 }
