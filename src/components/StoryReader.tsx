@@ -300,7 +300,7 @@ export function StoryReader({
             className="page-in flex-1 flex flex-col items-center justify-center text-center gap-6"
           >
             {currentImage ? (
-              <div className="illu-frame w-full max-w-sm rounded-2xl overflow-hidden border border-border/50 bg-background/40">
+              <div className={`${withAnimation ? "illu-frame" : ""} w-full max-w-sm rounded-2xl overflow-hidden border border-border/50 bg-background/40`}>
                 <img
                   src={currentImage}
                   alt=""
