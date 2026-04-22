@@ -225,6 +225,20 @@ function Home() {
               <Switch checked={withImages} onCheckedChange={setWithImages} />
             </label>
 
+            <label className={`flex items-center justify-between gap-3 cursor-pointer py-1 ${!withImages ? "opacity-50" : ""}`}>
+              <div className="text-sm">
+                <div className="font-medium">אנימציה לציורים</div>
+                <div className="text-xs text-muted-foreground">
+                  זום וריחוף עדינים על האיורים (Ken Burns)
+                </div>
+              </div>
+              <Switch
+                checked={withAnimation && withImages}
+                onCheckedChange={setWithAnimation}
+                disabled={!withImages}
+              />
+            </label>
+
             <label className="flex items-center justify-between gap-3 cursor-pointer py-1">
               <div className="text-sm">
                 <div className="font-medium">מוזיקה רכה ברקע</div>
