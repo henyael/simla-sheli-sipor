@@ -362,6 +362,7 @@ export function StoryReader({
               <Button
                 variant="ghost"
                 onClick={() => setPage((p) => Math.min(total - 1, p + 1))}
+                disabled={withImages && !currentImage}
                 className="rounded-full smooth"
               >
                 הבא ←
