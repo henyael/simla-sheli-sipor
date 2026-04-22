@@ -64,7 +64,7 @@ export function StoryReader({
     let cancelled = false;
 
     const PER_CALL_TIMEOUT_MS = 90_000;
-    const MAX_ATTEMPTS = 2;
+    const MAX_ATTEMPTS = 4;
 
     const tryGenerate = async (pageText: string): Promise<string | undefined> => {
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -90,23 +90,44 @@ export function StoryReader({
         } catch (err) {
           console.warn(`Illustration attempt ${attempt} failed`, err);
         }
+        if (attempt < MAX_ATTEMPTS) {
+          await new Promise((r) => window.setTimeout(r, 800 * attempt));
+        }
       }
       return undefined;
     };
 
     void (async () => {
-      // Fire all page illustrations in parallel; update state as each arrives
-      // so the progress bar moves smoothly.
-      await Promise.all(
-        pages.map(async (p, i) => {
-          if (p.image_url) return;
-          const url = await tryGenerate(p.text);
-          if (cancelled) return;
-          if (url) {
-            setImages((prev) => ({ ...prev, [i]: url }));
-          }
-        }),
-      );
+      // Track each page's image locally so we can keep retrying until every
+      // page truly has one before opening the reader.
+      const localImages: Record<number, string> = {};
+      pages.forEach((p, i) => {
+        if (p.image_url) localImages[i] = p.image_url;
+      });
+
+      const generateForIndex = async (i: number) => {
+        if (localImages[i]) return;
+        const url = await tryGenerate(pages[i].text);
+        if (cancelled) return;
+        if (url) {
+          localImages[i] = url;
+          setImages((prev) => ({ ...prev, [i]: url }));
+        }
+      };
+
+      // First pass — all pages in parallel.
+      await Promise.all(pages.map((_, i) => generateForIndex(i)));
+      if (cancelled) return;
+
+      // Safety net: any page still missing an image is retried sequentially
+      // so we never open the reader with a blank page.
+      for (let i = 0; i < pages.length; i++) {
+        if (cancelled) return;
+        if (!localImages[i]) {
+          await generateForIndex(i);
+        }
+      }
+
       if (!cancelled) setAllReady(true);
     })();
 
