@@ -240,9 +240,6 @@ export function StoryReader({
               style={{ width: `${pct}%` }}
             />
           </div>
-          <div className="mt-3 text-xs text-muted-foreground">
-            {imagesDone}/{totalToPaint} ציורים מוכנים
-          </div>
         </div>
       </div>
     );
