@@ -385,9 +385,18 @@
   animation: page-in 0.5s ease-out both;
 }
 
-/* Smooth transition utility */
+/* Smooth transition utility — adds subtle hover lift to any interactive element */
 .smooth {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button.smooth:not(:disabled):hover {
+  transform: translateY(-1px) scale(1.02);
+  filter: brightness(1.08);
+}
+
+button.smooth:not(:disabled):active {
+  transform: translateY(0) scale(0.98);
 }
 
 /* ===== Ken Burns + dreamy float for storybook illustrations ===== */
