@@ -63,6 +63,7 @@ function Home() {
   const [story, setStory] = useState<{
     title: string;
     pages: StoryPage[];
+    character_sheet?: string;
   } | null>(null);
   const [reading, setReading] = useState(false);
 
