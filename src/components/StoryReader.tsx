@@ -287,6 +287,12 @@ export function StoryReader({
 
           <div className="text-center text-xs text-muted-foreground mb-5">
             עמוד {page + 1} מתוך {total}
+            {withImages && imagesDone < totalToPaint && (
+              <span className="mr-2 inline-flex items-center gap-1 rounded-full border border-border bg-card/40 px-2 py-0.5">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                מצייר/ת ברקע · {imagesDone}/{totalToPaint}
+              </span>
+            )}
           </div>
 
           <div
@@ -298,8 +304,15 @@ export function StoryReader({
                 <img
                   src={currentImage}
                   alt=""
-                  className="illu-img w-full h-auto block"
+                  className={`${withAnimation ? "illu-img" : ""} w-full h-auto block`}
                 />
+              </div>
+            ) : withImages ? (
+              <div className="w-full max-w-sm aspect-square rounded-2xl border border-border/50 bg-background/40 flex items-center justify-center">
+                <div className="text-center text-muted-foreground text-sm">
+                  <div className="text-3xl mb-2 float-slow inline-block">🎨</div>
+                  <div>הציור לעמוד הזה עדיין נצבע…</div>
+                </div>
               </div>
             ) : null}
 
