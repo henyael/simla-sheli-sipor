@@ -37,15 +37,25 @@ export function StoryReader({
   const currentImage = current?.image_url ?? images[page];
   const ttsAvailable = isTTSAvailable();
 
+  // How many illustrations we still need before the story is "ready to read"
+  const pagesNeedingImages = withImages
+    ? pages.filter((p) => !p.image_url).length
+    : 0;
+  const imagesReady = withImages
+    ? pages.every((p, i) => Boolean(p.image_url ?? images[i]))
+    : true;
+  const imagesDone = withImages
+    ? pages.filter((p, i) => Boolean(p.image_url ?? images[i])).length
+    : 0;
+
   useEffect(() => {
     setPage(0);
     setImages({});
   }, [pages]);
 
-  // Generate illustrations in the background. We do up to 2 in parallel so
-  // page 1 has its image ready by the time the parent finishes reading page 0,
-  // but we never blast the gateway with all pages at once (which would
-  // re-introduce the Worker timeout).
+  // Generate ALL illustrations up-front (concurrency 2 to stay under timeouts).
+  // The reader stays on a "preparing" screen until every page has its image —
+  // this gives the kid an uninterrupted, fully-illustrated story.
   useEffect(() => {
     if (!withImages) return;
     let cancelled = false;
@@ -158,6 +168,49 @@ export function StoryReader({
     onClose();
   };
 
+  // While images are still being painted, show a calm "preparing the book"
+  // screen so the parent doesn't start reading before the illustrations exist.
+  if (withImages && !imagesReady) {
+    const pct = pagesNeedingImages
+      ? Math.round((imagesDone / pages.length) * 100)
+      : 0;
+    return (
+      <div
+        dir="rtl"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-md p-6"
+      >
+        <div className="relative w-full max-w-md text-center">
+          <button
+            onClick={handleClose}
+            className="absolute -top-2 left-0 text-sm text-muted-foreground hover:text-foreground smooth"
+            aria-label="סגור"
+          >
+            ✕ סגור
+          </button>
+
+          <div className="text-6xl mb-6 float-slow inline-block">🎨</div>
+          <h2 className="font-display text-2xl text-primary mb-3">
+            מציירים את "{title}"
+          </h2>
+          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+            מצייר/ת כל עמוד ביד, באותו סגנון ועם אותן דמויות. רגע של סבלנות —
+            הסיפור ייפתח ברגע שכל הציורים מוכנים.
+          </p>
+
+          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full bg-primary smooth"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="mt-3 text-xs text-muted-foreground">
+            {imagesDone} מתוך {pages.length} ציורים מוכנים
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       dir="rtl"
@@ -214,17 +267,12 @@ export function StoryReader({
             className="page-in flex-1 flex flex-col items-center justify-center text-center gap-6"
           >
             {currentImage ? (
-              <div className="w-full max-w-sm rounded-2xl overflow-hidden shadow-xl border border-border/50 bg-background/40">
+              <div className="illu-frame w-full max-w-sm rounded-2xl overflow-hidden border border-border/50 bg-background/40">
                 <img
                   src={currentImage}
                   alt=""
-                  className="w-full h-auto block"
-                  loading="lazy"
+                  className="illu-img w-full h-auto block"
                 />
-              </div>
-            ) : withImages ? (
-              <div className="w-full max-w-sm aspect-square rounded-2xl border border-border/50 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-muted-foreground text-sm animate-pulse">
-                ✨ מציירים…
               </div>
             ) : null}
 

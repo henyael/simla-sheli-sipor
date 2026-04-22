@@ -389,3 +389,57 @@
 .smooth {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* ===== Ken Burns + dreamy float for storybook illustrations ===== */
+@keyframes ken-burns {
+  0% {
+    transform: scale(1.04) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.12) translate(-1.5%, -1%);
+  }
+  100% {
+    transform: scale(1.04) translate(0, 0);
+  }
+}
+
+@keyframes illu-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes illu-shimmer {
+  0%,
+  100% {
+    box-shadow:
+      0 10px 40px -10px oklch(0.78 0.14 250 / 0.35),
+      0 0 0 1px oklch(0.97 0.02 290 / 0.08);
+  }
+  50% {
+    box-shadow:
+      0 14px 60px -8px oklch(0.82 0.13 295 / 0.55),
+      0 0 0 1px oklch(0.97 0.02 290 / 0.16);
+  }
+}
+
+.illu-frame {
+  animation: illu-float 7s ease-in-out infinite, illu-shimmer 6s ease-in-out infinite;
+}
+
+.illu-img {
+  animation: ken-burns 14s ease-in-out infinite;
+  transform-origin: 50% 45%;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .illu-frame,
+  .illu-img {
+    animation: none !important;
+  }
+}
