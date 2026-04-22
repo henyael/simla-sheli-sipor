@@ -276,48 +276,26 @@ export function StoryReader({
 
           <div className="text-center text-xs text-muted-foreground mb-5">
             עמוד {page + 1} מתוך {total}
-            {withImages && imagesDone < totalToPaint && (
-              <span className="mr-2 inline-flex items-center gap-1 rounded-full border border-border bg-card/40 px-2 py-0.5">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                מצייר/ת ברקע · {imagesDone}/{totalToPaint}
-              </span>
-            )}
           </div>
 
-          {(() => {
-            // When illustrations are enabled, the text for a page is hidden
-            // until that page's image is fully ready — the parent should not
-            // start reading before the picture is on screen.
-            const waitingForImage = withImages && !currentImage;
-            return (
-              <div
-                key={page}
-                className="page-in flex-1 flex flex-col items-center justify-center text-center gap-6"
-              >
-                {currentImage ? (
-                  <div className={`${withAnimation ? "illu-frame" : ""} w-full max-w-sm rounded-2xl overflow-hidden border border-border/50 bg-background/40`}>
-                    <img
-                      src={currentImage}
-                      alt=""
-                      className={`${withAnimation ? "illu-img" : ""} w-full h-auto block`}
-                    />
-                  </div>
-                ) : withImages ? (
-                  <div className="w-full max-w-sm aspect-square rounded-2xl border border-border/50 bg-background/40 flex flex-col items-center justify-center gap-3">
-                    <div className="text-4xl float-slow inline-block">🎨</div>
-                    <div className="text-sm text-muted-foreground">מציירים את העמוד הזה…</div>
-                    <div className="text-xs text-muted-foreground/70">{imagesDone}/{totalToPaint} ציורים מוכנים</div>
-                  </div>
-                ) : null}
-
-                {!waitingForImage && (
-                  <p className="story-text text-foreground/95 px-1">
-                    {current?.text}
-                  </p>
-                )}
+          <div
+            key={page}
+            className="page-in flex-1 flex flex-col items-center justify-center text-center gap-6"
+          >
+            {currentImage && (
+              <div className={`${withAnimation ? "illu-frame" : ""} w-full max-w-sm rounded-2xl overflow-hidden border border-border/50 bg-background/40`}>
+                <img
+                  src={currentImage}
+                  alt=""
+                  className={`${withAnimation ? "illu-img" : ""} w-full h-auto block`}
+                />
               </div>
-            );
-          })()}
+            )}
+
+            <p className="story-text text-foreground/95 px-1">
+              {current?.text}
+            </p>
+          </div>
 
           <div className="mt-8 flex items-center justify-between gap-3">
             <Button
@@ -351,7 +329,6 @@ export function StoryReader({
               <Button
                 variant="ghost"
                 onClick={() => setPage((p) => Math.min(total - 1, p + 1))}
-                disabled={withImages && !currentImage}
                 className="rounded-full smooth"
               >
                 הבא ←
