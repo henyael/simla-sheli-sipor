@@ -14,6 +14,8 @@ interface StoryReaderProps {
   autoMusic?: boolean;
   /** Generate watercolor illustrations per page in the background. */
   withImages?: boolean;
+  /** Apply Ken Burns zoom/pan animation to illustrations. */
+  withAnimation?: boolean;
   /** Shared style anchor sent with every illustration request so all pages match. */
   styleAnchor?: string;
 }
@@ -24,6 +26,7 @@ export function StoryReader({
   onClose,
   autoMusic = false,
   withImages = false,
+  withAnimation = false,
   styleAnchor = "",
 }: StoryReaderProps) {
   const [page, setPage] = useState(0);
@@ -37,63 +40,88 @@ export function StoryReader({
   const currentImage = current?.image_url ?? images[page];
   const ttsAvailable = isTTSAvailable();
 
-  // How many illustrations we still need before the story is "ready to read"
-  const pagesNeedingImages = withImages
-    ? pages.filter((p) => !p.image_url).length
-    : 0;
-  const imagesReady = withImages
-    ? pages.every((p, i) => Boolean(p.image_url ?? images[i]))
-    : true;
+  // The reader becomes "ready" as soon as the FIRST page has its illustration
+  // (or after a short fallback). The rest are painted in the background while
+  // the parent reads — much more responsive than blocking on the entire book.
+  const [firstReady, setFirstReady] = useState(!withImages);
   const imagesDone = withImages
     ? pages.filter((p, i) => Boolean(p.image_url ?? images[i])).length
-    : 0;
+    : pages.length;
+  const totalToPaint = withImages ? pages.length : 0;
 
   useEffect(() => {
     setPage(0);
     setImages({});
-  }, [pages]);
+    setFirstReady(!withImages);
+  }, [pages, withImages]);
 
-  // Generate ALL illustrations up-front (concurrency 2 to stay under timeouts).
-  // The reader stays on a "preparing" screen until every page has its image —
-  // this gives the kid an uninterrupted, fully-illustrated story.
+  // Generate illustrations sequentially (concurrency=1) with a hard per-call
+  // timeout + one retry. Sequential is much more reliable on the AI gateway
+  // than parallel — parallel was hitting "upstream request timeout" on most
+  // pages. We also open the reader as soon as page 1 is painted.
   useEffect(() => {
     if (!withImages) return;
     let cancelled = false;
 
-    const queue = pages
-      .map((p, i) => ({ i, p }))
-      .filter(({ p }) => !p.image_url);
-    let cursor = 0;
-    const CONCURRENCY = 2;
+    // Hard timeout so a single slow page never blocks the whole book
+    const PER_CALL_TIMEOUT_MS = 45_000;
+    const MAX_ATTEMPTS = 2;
+    // Safety net: if page 1 is still not painted after this, open the reader
+    // anyway and let images stream in as they arrive.
+    const FIRST_PAGE_FALLBACK_MS = 50_000;
 
-    const runOne = async () => {
-      while (!cancelled) {
-        const idx = cursor++;
-        if (idx >= queue.length) return;
-        const { i, p } = queue[idx];
+    const fallbackTimer = window.setTimeout(() => {
+      if (!cancelled) setFirstReady(true);
+    }, FIRST_PAGE_FALLBACK_MS);
+
+    const tryGenerate = async (pageText: string): Promise<string | undefined> => {
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
         try {
-          const res = await generateImage({
-            data: {
-              pageText: p.text,
-              storyTitle: title,
-              styleAnchor:
-                styleAnchor || `Bedtime story titled "${title}". Keep the same character design across every page.`,
-            },
-          });
-          if (cancelled) return;
-          if (res.image_url) {
-            setImages((prev) => ({ ...prev, [i]: res.image_url as string }));
-          }
+          const result = await Promise.race([
+            generateImage({
+              data: {
+                pageText,
+                storyTitle: title,
+                styleAnchor:
+                  styleAnchor ||
+                  `Bedtime story titled "${title}". Keep the same character design across every page.`,
+              },
+            }),
+            new Promise<never>((_, reject) =>
+              window.setTimeout(
+                () => reject(new Error("client-side timeout")),
+                PER_CALL_TIMEOUT_MS,
+              ),
+            ),
+          ]);
+          if (result?.image_url) return result.image_url;
         } catch (err) {
-          console.warn("Illustration failed for page", i, err);
+          console.warn(`Illustration attempt ${attempt} failed`, err);
         }
       }
+      return undefined;
     };
 
-    void Promise.all(Array.from({ length: CONCURRENCY }, runOne));
+    void (async () => {
+      for (let i = 0; i < pages.length; i++) {
+        if (cancelled) return;
+        if (pages[i].image_url) {
+          if (i === 0) setFirstReady(true);
+          continue;
+        }
+        const url = await tryGenerate(pages[i].text);
+        if (cancelled) return;
+        if (url) {
+          setImages((prev) => ({ ...prev, [i]: url }));
+        }
+        // Open the reader the moment page 1 is done (with or without an image)
+        if (i === 0) setFirstReady(true);
+      }
+    })();
 
     return () => {
       cancelled = true;
+      window.clearTimeout(fallbackTimer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pages, withImages, title, styleAnchor]);
@@ -168,12 +196,11 @@ export function StoryReader({
     onClose();
   };
 
-  // While images are still being painted, show a calm "preparing the book"
-  // screen so the parent doesn't start reading before the illustrations exist.
-  if (withImages && !imagesReady) {
-    const pct = pagesNeedingImages
-      ? Math.round((imagesDone / pages.length) * 100)
-      : 0;
+  // Show a brief "preparing" screen ONLY until the first illustration is ready
+  // (or the fallback timeout fires). This keeps the wait short and lets the
+  // remaining pages stream in while the parent reads.
+  if (withImages && !firstReady) {
+    const pct = Math.max(5, Math.round((imagesDone / Math.max(1, totalToPaint)) * 100));
     return (
       <div
         dir="rtl"
@@ -193,8 +220,8 @@ export function StoryReader({
             מציירים את "{title}"
           </h2>
           <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-            מצייר/ת כל עמוד ביד, באותו סגנון ועם אותן דמויות. רגע של סבלנות —
-            הסיפור ייפתח ברגע שכל הציורים מוכנים.
+            מצייר/ת את העמוד הראשון. ברגע שהוא מוכן הסיפור ייפתח, ושאר הציורים
+            ייווצרו ברקע תוך כדי קריאה.
           </p>
 
           <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -204,7 +231,7 @@ export function StoryReader({
             />
           </div>
           <div className="mt-3 text-xs text-muted-foreground">
-            {imagesDone} מתוך {pages.length} ציורים מוכנים
+            מכין/ה את העמוד הראשון…
           </div>
         </div>
       </div>
@@ -260,6 +287,12 @@ export function StoryReader({
 
           <div className="text-center text-xs text-muted-foreground mb-5">
             עמוד {page + 1} מתוך {total}
+            {withImages && imagesDone < totalToPaint && (
+              <span className="mr-2 inline-flex items-center gap-1 rounded-full border border-border bg-card/40 px-2 py-0.5">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                מצייר/ת ברקע · {imagesDone}/{totalToPaint}
+              </span>
+            )}
           </div>
 
           <div
@@ -267,12 +300,19 @@ export function StoryReader({
             className="page-in flex-1 flex flex-col items-center justify-center text-center gap-6"
           >
             {currentImage ? (
-              <div className="illu-frame w-full max-w-sm rounded-2xl overflow-hidden border border-border/50 bg-background/40">
+              <div className={`${withAnimation ? "illu-frame" : ""} w-full max-w-sm rounded-2xl overflow-hidden border border-border/50 bg-background/40`}>
                 <img
                   src={currentImage}
                   alt=""
-                  className="illu-img w-full h-auto block"
+                  className={`${withAnimation ? "illu-img" : ""} w-full h-auto block`}
                 />
+              </div>
+            ) : withImages ? (
+              <div className="w-full max-w-sm aspect-square rounded-2xl border border-border/50 bg-background/40 flex items-center justify-center">
+                <div className="text-center text-muted-foreground text-sm">
+                  <div className="text-3xl mb-2 float-slow inline-block">🎨</div>
+                  <div>הציור לעמוד הזה עדיין נצבע…</div>
+                </div>
               </div>
             ) : null}
 
