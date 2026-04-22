@@ -17,7 +17,7 @@ const imageInputSchema = z.object({
 });
 
 export type StoryPage = { text: string; image_url?: string };
-export type StoryResult = { title: string; pages: StoryPage[] };
+export type StoryResult = { title: string; pages: StoryPage[]; character_sheet?: string };
 
 const lengthSpec: Record<string, { pages: string; words: string }> = {
   short: { pages: "5-7 עמודים", words: "כ-250-400 מילים (1-3 דקות קריאה)" },
@@ -119,6 +119,7 @@ export const generateStory = createServerFn({ method: "POST" })
 - חלק את הסיפור ל"עמודים" של 2-3 משפטים בלבד כל אחד.
 - הסיום חייב להיות שלו, חלומי, מנמנם.
 - הוסף כותרת קצרה ופיוטית בעברית.
+- הוסף "character_sheet" באנגלית: תיאור ויזואלי מדויק של הדמות הראשית והדמויות המשניות שיישאר זהה בכל איור (גיל, מבנה גוף, צבע ואורך שיער, צבע עיניים, בגדים מדויקים כולל צבעים, חפצים אופייניים, וגם תיאור הסביבה/עולם הסיפור). זה ה"תנ"ך" של האייר — חייב להיות ספציפי מאוד כדי שכל הציורים ייראו מאותו ספר.
 
 החזר תשובה אך ורק דרך קריאת הכלי save_story.`;
 
@@ -138,6 +139,11 @@ export const generateStory = createServerFn({ method: "POST" })
               type: "object",
               properties: {
                 title: { type: "string", description: "כותרת קצרה בעברית" },
+                character_sheet: {
+                  type: "string",
+                  description:
+                    "Detailed English visual description of main + supporting characters and setting (age, body, hair color & length, eye color, exact clothing with colors, signature props, world). Used as a locked style anchor for every illustration.",
+                },
                 pages: {
                   type: "array",
                   description: "עמודי הסיפור, 2-3 משפטים כל אחד",
@@ -151,7 +157,7 @@ export const generateStory = createServerFn({ method: "POST" })
                   },
                 },
               },
-              required: ["title", "pages"],
+              required: ["title", "character_sheet", "pages"],
               additionalProperties: false,
             },
           },
