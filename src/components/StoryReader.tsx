@@ -196,12 +196,11 @@ export function StoryReader({
     onClose();
   };
 
-  // While images are still being painted, show a calm "preparing the book"
-  // screen so the parent doesn't start reading before the illustrations exist.
-  if (withImages && !imagesReady) {
-    const pct = pagesNeedingImages
-      ? Math.round((imagesDone / pages.length) * 100)
-      : 0;
+  // Show a brief "preparing" screen ONLY until the first illustration is ready
+  // (or the fallback timeout fires). This keeps the wait short and lets the
+  // remaining pages stream in while the parent reads.
+  if (withImages && !firstReady) {
+    const pct = Math.max(5, Math.round((imagesDone / Math.max(1, totalToPaint)) * 100));
     return (
       <div
         dir="rtl"
@@ -221,8 +220,8 @@ export function StoryReader({
             מציירים את "{title}"
           </h2>
           <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-            מצייר/ת כל עמוד ביד, באותו סגנון ועם אותן דמויות. רגע של סבלנות —
-            הסיפור ייפתח ברגע שכל הציורים מוכנים.
+            מצייר/ת את העמוד הראשון. ברגע שהוא מוכן הסיפור ייפתח, ושאר הציורים
+            ייווצרו ברקע תוך כדי קריאה.
           </p>
 
           <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -232,7 +231,7 @@ export function StoryReader({
             />
           </div>
           <div className="mt-3 text-xs text-muted-foreground">
-            {imagesDone} מתוך {pages.length} ציורים מוכנים
+            מכין/ה את העמוד הראשון…
           </div>
         </div>
       </div>
