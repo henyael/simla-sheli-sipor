@@ -55,6 +55,7 @@ function Home() {
 
   // Optional features
   const [withImages, setWithImages] = useState(true);
+  const [withAnimation, setWithAnimation] = useState(false);
   const [withMusic, setWithMusic] = useState(true);
   const [withTTS, setWithTTS] = useState(false);
 
