@@ -37,15 +37,25 @@ export function StoryReader({
   const currentImage = current?.image_url ?? images[page];
   const ttsAvailable = isTTSAvailable();
 
+  // How many illustrations we still need before the story is "ready to read"
+  const pagesNeedingImages = withImages
+    ? pages.filter((p) => !p.image_url).length
+    : 0;
+  const imagesReady = withImages
+    ? pages.every((p, i) => Boolean(p.image_url ?? images[i]))
+    : true;
+  const imagesDone = withImages
+    ? pages.filter((p, i) => Boolean(p.image_url ?? images[i])).length
+    : 0;
+
   useEffect(() => {
     setPage(0);
     setImages({});
   }, [pages]);
 
-  // Generate illustrations in the background. We do up to 2 in parallel so
-  // page 1 has its image ready by the time the parent finishes reading page 0,
-  // but we never blast the gateway with all pages at once (which would
-  // re-introduce the Worker timeout).
+  // Generate ALL illustrations up-front (concurrency 2 to stay under timeouts).
+  // The reader stays on a "preparing" screen until every page has its image —
+  // this gives the kid an uninterrupted, fully-illustrated story.
   useEffect(() => {
     if (!withImages) return;
     let cancelled = false;
