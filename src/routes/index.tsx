@@ -301,6 +301,7 @@ function Home() {
           pages={story.pages}
           autoMusic={withMusic}
           withImages={withImages}
+          withAnimation={withAnimation && withImages}
           styleAnchor={
             story.character_sheet ||
             `Main character: a child named ${childName.trim()}. Story idea: ${topic.trim()}. Keep this same character's appearance (clothing, hair, body) on every page.`
