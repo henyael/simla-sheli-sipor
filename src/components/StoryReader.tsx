@@ -168,6 +168,49 @@ export function StoryReader({
     onClose();
   };
 
+  // While images are still being painted, show a calm "preparing the book"
+  // screen so the parent doesn't start reading before the illustrations exist.
+  if (withImages && !imagesReady) {
+    const pct = pagesNeedingImages
+      ? Math.round((imagesDone / pages.length) * 100)
+      : 0;
+    return (
+      <div
+        dir="rtl"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-md p-6"
+      >
+        <div className="relative w-full max-w-md text-center">
+          <button
+            onClick={handleClose}
+            className="absolute -top-2 left-0 text-sm text-muted-foreground hover:text-foreground smooth"
+            aria-label="סגור"
+          >
+            ✕ סגור
+          </button>
+
+          <div className="text-6xl mb-6 float-slow inline-block">🎨</div>
+          <h2 className="font-display text-2xl text-primary mb-3">
+            מציירים את "{title}"
+          </h2>
+          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+            מצייר/ת כל עמוד ביד, באותו סגנון ועם אותן דמויות. רגע של סבלנות —
+            הסיפור ייפתח ברגע שכל הציורים מוכנים.
+          </p>
+
+          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full bg-primary smooth"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="mt-3 text-xs text-muted-foreground">
+            {imagesDone} מתוך {pages.length} ציורים מוכנים
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       dir="rtl"
@@ -224,17 +267,12 @@ export function StoryReader({
             className="page-in flex-1 flex flex-col items-center justify-center text-center gap-6"
           >
             {currentImage ? (
-              <div className="w-full max-w-sm rounded-2xl overflow-hidden shadow-xl border border-border/50 bg-background/40">
+              <div className="illu-frame w-full max-w-sm rounded-2xl overflow-hidden border border-border/50 bg-background/40">
                 <img
                   src={currentImage}
                   alt=""
-                  className="w-full h-auto block"
-                  loading="lazy"
+                  className="illu-img w-full h-auto block"
                 />
-              </div>
-            ) : withImages ? (
-              <div className="w-full max-w-sm aspect-square rounded-2xl border border-border/50 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-muted-foreground text-sm animate-pulse">
-                ✨ מציירים…
               </div>
             ) : null}
 
