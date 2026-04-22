@@ -51,13 +51,13 @@ async function generatePageImage(
 
     const prompt = `${STYLE_BIBLE}
 
-STORY-SPECIFIC ANCHOR (keep these characters/setting consistent every page):
+LOCKED CHARACTER SHEET (CRITICAL — every character MUST look exactly like this on every single page; do not change clothing, hair, age, body, or colors between pages):
 ${styleAnchor}
 
 BOOK TITLE: "${storyTitle}"
 SCENE TO ILLUSTRATE FOR THIS PAGE: ${pageText}
 
-Paint this scene now in the exact style described above, matching the story-specific anchor.`;
+Paint this scene now in the exact style described above. The characters MUST match the locked character sheet exactly — same face, same hair, same clothes, same colors. Only the pose, expression, and background scene change between pages.`;
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
