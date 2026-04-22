@@ -390,12 +390,18 @@
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-button.smooth:not(:disabled):hover {
-  transform: translateY(-1px) scale(1.02);
-  filter: brightness(1.08);
+/* Hover lift for any custom <button> using .smooth (option pickers, audio toggles, etc.) */
+button.smooth:not(:disabled):hover,
+a.smooth:hover {
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.12);
+  box-shadow: 0 8px 24px -8px oklch(0.82 0.13 295 / 0.45);
+  border-color: oklch(0.82 0.13 295 / 0.6) !important;
+  background-color: oklch(0.82 0.13 295 / 0.12);
 }
 
-button.smooth:not(:disabled):active {
+button.smooth:not(:disabled):active,
+a.smooth:active {
   transform: translateY(0) scale(0.98);
 }
 
