@@ -14,6 +14,8 @@ interface StoryReaderProps {
   autoMusic?: boolean;
   /** Generate watercolor illustrations per page in the background. */
   withImages?: boolean;
+  /** Apply Ken Burns zoom/pan animation to illustrations. */
+  withAnimation?: boolean;
   /** Shared style anchor sent with every illustration request so all pages match. */
   styleAnchor?: string;
 }
@@ -24,6 +26,7 @@ export function StoryReader({
   onClose,
   autoMusic = false,
   withImages = false,
+  withAnimation = false,
   styleAnchor = "",
 }: StoryReaderProps) {
   const [page, setPage] = useState(0);
