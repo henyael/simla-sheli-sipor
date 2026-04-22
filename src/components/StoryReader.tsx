@@ -40,63 +40,88 @@ export function StoryReader({
   const currentImage = current?.image_url ?? images[page];
   const ttsAvailable = isTTSAvailable();
 
-  // How many illustrations we still need before the story is "ready to read"
-  const pagesNeedingImages = withImages
-    ? pages.filter((p) => !p.image_url).length
-    : 0;
-  const imagesReady = withImages
-    ? pages.every((p, i) => Boolean(p.image_url ?? images[i]))
-    : true;
+  // The reader becomes "ready" as soon as the FIRST page has its illustration
+  // (or after a short fallback). The rest are painted in the background while
+  // the parent reads — much more responsive than blocking on the entire book.
+  const [firstReady, setFirstReady] = useState(!withImages);
   const imagesDone = withImages
     ? pages.filter((p, i) => Boolean(p.image_url ?? images[i])).length
-    : 0;
+    : pages.length;
+  const totalToPaint = withImages ? pages.length : 0;
 
   useEffect(() => {
     setPage(0);
     setImages({});
-  }, [pages]);
+    setFirstReady(!withImages);
+  }, [pages, withImages]);
 
-  // Generate ALL illustrations up-front (concurrency 2 to stay under timeouts).
-  // The reader stays on a "preparing" screen until every page has its image —
-  // this gives the kid an uninterrupted, fully-illustrated story.
+  // Generate illustrations sequentially (concurrency=1) with a hard per-call
+  // timeout + one retry. Sequential is much more reliable on the AI gateway
+  // than parallel — parallel was hitting "upstream request timeout" on most
+  // pages. We also open the reader as soon as page 1 is painted.
   useEffect(() => {
     if (!withImages) return;
     let cancelled = false;
 
-    const queue = pages
-      .map((p, i) => ({ i, p }))
-      .filter(({ p }) => !p.image_url);
-    let cursor = 0;
-    const CONCURRENCY = 2;
+    // Hard timeout so a single slow page never blocks the whole book
+    const PER_CALL_TIMEOUT_MS = 45_000;
+    const MAX_ATTEMPTS = 2;
+    // Safety net: if page 1 is still not painted after this, open the reader
+    // anyway and let images stream in as they arrive.
+    const FIRST_PAGE_FALLBACK_MS = 50_000;
 
-    const runOne = async () => {
-      while (!cancelled) {
-        const idx = cursor++;
-        if (idx >= queue.length) return;
-        const { i, p } = queue[idx];
+    const fallbackTimer = window.setTimeout(() => {
+      if (!cancelled) setFirstReady(true);
+    }, FIRST_PAGE_FALLBACK_MS);
+
+    const tryGenerate = async (pageText: string): Promise<string | undefined> => {
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
         try {
-          const res = await generateImage({
-            data: {
-              pageText: p.text,
-              storyTitle: title,
-              styleAnchor:
-                styleAnchor || `Bedtime story titled "${title}". Keep the same character design across every page.`,
-            },
-          });
-          if (cancelled) return;
-          if (res.image_url) {
-            setImages((prev) => ({ ...prev, [i]: res.image_url as string }));
-          }
+          const result = await Promise.race([
+            generateImage({
+              data: {
+                pageText,
+                storyTitle: title,
+                styleAnchor:
+                  styleAnchor ||
+                  `Bedtime story titled "${title}". Keep the same character design across every page.`,
+              },
+            }),
+            new Promise<never>((_, reject) =>
+              window.setTimeout(
+                () => reject(new Error("client-side timeout")),
+                PER_CALL_TIMEOUT_MS,
+              ),
+            ),
+          ]);
+          if (result?.image_url) return result.image_url;
         } catch (err) {
-          console.warn("Illustration failed for page", i, err);
+          console.warn(`Illustration attempt ${attempt} failed`, err);
         }
       }
+      return undefined;
     };
 
-    void Promise.all(Array.from({ length: CONCURRENCY }, runOne));
+    void (async () => {
+      for (let i = 0; i < pages.length; i++) {
+        if (cancelled) return;
+        if (pages[i].image_url) {
+          if (i === 0) setFirstReady(true);
+          continue;
+        }
+        const url = await tryGenerate(pages[i].text);
+        if (cancelled) return;
+        if (url) {
+          setImages((prev) => ({ ...prev, [i]: url }));
+        }
+        // Open the reader the moment page 1 is done (with or without an image)
+        if (i === 0) setFirstReady(true);
+      }
+    })();
 
     return () => {
       cancelled = true;
+      window.clearTimeout(fallbackTimer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pages, withImages, title, styleAnchor]);
