@@ -1,82 +1,77 @@
 /**
- * Magical sleepy lullaby — Web Audio, no external assets.
+ * Theta/Delta sleep brainwave audio — Web Audio, no external assets.
  *
- * Layers:
- *  - A warm low sine pad in a gentle Cmaj7-ish voicing (very soft, slowly drifting).
- *  - A faint filtered noise "night air" bed (almost subliminal).
- *  - Occasional slow, sparkly high bell tones (sine + short envelope) — like
- *    distant stars chiming, very rare so it doesn't wake anyone.
+ * Uses BINAURAL BEATS to gently entrain the brain toward sleep:
+ *  - Delta beat (3 Hz) = deep sleep range (0.5–4 Hz)
+ *  - Theta beat (6 Hz) = drowsy / pre-sleep range (4–8 Hz)
  *
- * Tuned to feel like the soundtrack of a children's bedtime book:
- * spacious, dreamy, slow, never melodic enough to demand attention.
+ * How binaural beats work: send a slightly different pure sine into each ear.
+ * The brain perceives a "beat" at the frequency *difference*. So 200 Hz left
+ * and 203 Hz right = perceived 3 Hz delta beat. **Headphones are required**
+ * for the binaural effect — without them it just sounds like a soft drone.
+ *
+ * On top of the binaural carriers we add a very soft pink-ish noise bed
+ * (like distant rain) so it never feels clinical or sterile.
+ *
+ * IMPORTANT: We use a ChannelMerger so left/right oscillators stay strictly
+ * separated — that's what makes binaural beats actually work.
  */
 type AudioCtx = AudioContext;
 
 let ctx: AudioCtx | null = null;
 let master: GainNode | null = null;
 let nodes: { stop: () => void }[] = [];
-let bellTimer: number | null = null;
 
-// Cmaj7 voicing, low octaves — warm, soft, slightly dreamy (the 7th adds magic).
-const PAD_NOTES = [
-  130.81, // C3
-  164.81, // E3
-  196.0, // G3
-  246.94, // B3  (the magical 7th)
-];
+// Carrier base frequencies. Low-mid sines feel warm and don't fatigue the ear.
+// Delta carrier pair: 200 Hz / 203 Hz  → 3 Hz delta beat (deep sleep)
+// Theta carrier pair: 144 Hz / 150 Hz  → 6 Hz theta beat (drowsy / dreamy)
+const DELTA = { left: 200, right: 203 };
+const THETA = { left: 144, right: 150 };
 
-// Pentatonic high notes for the bell twinkles — always consonant, never harsh.
-const BELL_NOTES = [
-  1046.5, // C6
-  1174.66, // D6
-  1318.51, // E6
-  1567.98, // G6
-  1760.0, // A6
-];
+function createBinauralPair(
+  c: AudioCtx,
+  merger: ChannelMergerNode,
+  leftHz: number,
+  rightHz: number,
+  level: number,
+) {
+  const oscL = c.createOscillator();
+  oscL.type = "sine";
+  oscL.frequency.value = leftHz;
 
-function scheduleBell(c: AudioCtx, out: GainNode) {
-  const freq = BELL_NOTES[Math.floor(Math.random() * BELL_NOTES.length)];
+  const oscR = c.createOscillator();
+  oscR.type = "sine";
+  oscR.frequency.value = rightHz;
 
-  // Two stacked sines = soft glockenspiel/celesta vibe
-  const o1 = c.createOscillator();
-  o1.type = "sine";
-  o1.frequency.value = freq;
+  const gL = c.createGain();
+  gL.gain.value = level;
+  const gR = c.createGain();
+  gR.gain.value = level;
 
-  const o2 = c.createOscillator();
-  o2.type = "sine";
-  o2.frequency.value = freq * 2; // octave above, very quiet
+  oscL.connect(gL);
+  oscR.connect(gR);
+  // Strict left/right routing — required for the binaural effect
+  gL.connect(merger, 0, 0);
+  gR.connect(merger, 0, 1);
 
-  const g = c.createGain();
-  g.gain.value = 0;
+  oscL.start();
+  oscR.start();
 
-  // Gentle low-pass so it never feels metallic
-  const lp = c.createBiquadFilter();
-  lp.type = "lowpass";
-  lp.frequency.value = 3200;
-  lp.Q.value = 0.4;
-
-  const o2g = c.createGain();
-  o2g.gain.value = 0.25;
-
-  o1.connect(g);
-  o2.connect(o2g);
-  o2g.connect(g);
-  g.connect(lp);
-  lp.connect(out);
-
-  const t = c.currentTime;
-  // Soft bell envelope — quick attack, long sleepy tail
-  g.gain.setValueAtTime(0, t);
-  g.gain.linearRampToValueAtTime(0.18, t + 0.04);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 4.5);
-
-  o1.start(t);
-  o2.start(t);
-  o1.stop(t + 4.6);
-  o2.stop(t + 4.6);
+  return () => {
+    try {
+      oscL.stop();
+    } catch {
+      /* noop */
+    }
+    try {
+      oscR.stop();
+    } catch {
+      /* noop */
+    }
+  };
 }
 
-export async function startAmbientMusic(volume = 0.14): Promise<boolean> {
+export async function startAmbientMusic(volume = 0.12): Promise<boolean> {
   if (ctx) {
     if (ctx.state === "suspended") {
       try {
@@ -107,71 +102,34 @@ export async function startAmbientMusic(volume = 0.14): Promise<boolean> {
 
   master = ctx.createGain();
   master.gain.value = 0;
-  // Gentle global low-pass so nothing pokes through harshly
-  const masterLP = ctx.createBiquadFilter();
-  masterLP.type = "lowpass";
-  masterLP.frequency.value = 5000;
-  masterLP.Q.value = 0.3;
-  master.connect(masterLP);
-  masterLP.connect(ctx.destination);
-  master.gain.linearRampToValueAtTime(volume, ctx.currentTime + 3.5);
+  master.connect(ctx.destination);
+  master.gain.linearRampToValueAtTime(volume, ctx.currentTime + 4.0);
 
-  // ----- Warm sleepy pad -----
-  const padBus = ctx.createGain();
-  padBus.gain.value = 0.85;
-  padBus.connect(master);
+  // Stereo merger keeps L/R strictly separated for binaural beats
+  const merger = ctx.createChannelMerger(2);
+  merger.connect(master);
 
-  for (const freq of PAD_NOTES) {
-    const osc = ctx.createOscillator();
-    osc.type = "sine";
-    osc.frequency.value = freq;
+  // Delta beat (3 Hz) — slightly louder, the primary sleep driver
+  const stopDelta = createBinauralPair(
+    ctx,
+    merger,
+    DELTA.left,
+    DELTA.right,
+    0.22,
+  );
+  // Theta beat (6 Hz) — quieter, layered on top for the dreamy "drift off" feel
+  const stopTheta = createBinauralPair(
+    ctx,
+    merger,
+    THETA.left,
+    THETA.right,
+    0.14,
+  );
 
-    // A second osc detuned slightly — gives the pad a warm chorus shimmer
-    const osc2 = ctx.createOscillator();
-    osc2.type = "sine";
-    osc2.frequency.value = freq * 1.003;
+  nodes.push({ stop: stopDelta });
+  nodes.push({ stop: stopTheta });
 
-    const gain = ctx.createGain();
-    gain.gain.value = 0.13;
-
-    // Very slow LFO — the pad breathes like someone sleeping
-    const lfo = ctx.createOscillator();
-    lfo.frequency.value = 0.05 + Math.random() * 0.06;
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 0.045;
-    lfo.connect(lfoGain);
-    lfoGain.connect(gain.gain);
-
-    osc.connect(gain);
-    osc2.connect(gain);
-    gain.connect(padBus);
-
-    osc.start();
-    osc2.start();
-    lfo.start();
-
-    nodes.push({
-      stop: () => {
-        try {
-          osc.stop();
-        } catch {
-          /* noop */
-        }
-        try {
-          osc2.stop();
-        } catch {
-          /* noop */
-        }
-        try {
-          lfo.stop();
-        } catch {
-          /* noop */
-        }
-      },
-    });
-  }
-
-  // ----- Faint "night air" noise -----
+  // ----- Soft "rain-like" noise bed so it doesn't sound clinical -----
   const bufferSize = 2 * ctx.sampleRate;
   const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const channel = noiseBuffer.getChannelData(0);
@@ -184,11 +142,11 @@ export async function startAmbientMusic(volume = 0.14): Promise<boolean> {
 
   const noiseFilter = ctx.createBiquadFilter();
   noiseFilter.type = "lowpass";
-  noiseFilter.frequency.value = 280;
-  noiseFilter.Q.value = 0.7;
+  noiseFilter.frequency.value = 320;
+  noiseFilter.Q.value = 0.5;
 
   const noiseGain = ctx.createGain();
-  noiseGain.gain.value = 0.04;
+  noiseGain.gain.value = 0.05;
 
   noise.connect(noiseFilter);
   noiseFilter.connect(noiseGain);
@@ -205,29 +163,10 @@ export async function startAmbientMusic(volume = 0.14): Promise<boolean> {
     },
   });
 
-  // ----- Occasional sparkle bells -----
-  const bellBus = ctx.createGain();
-  bellBus.gain.value = 0.55;
-  bellBus.connect(master);
-
-  const tick = () => {
-    if (!ctx || !master) return;
-    scheduleBell(ctx, bellBus);
-    // Random gap between 7s and 16s — sparse, never pushy
-    const next = 7000 + Math.random() * 9000;
-    bellTimer = window.setTimeout(tick, next);
-  };
-  // First bell after a longer pause so the pad sets the mood first
-  bellTimer = window.setTimeout(tick, 6000);
-
   return true;
 }
 
 export function stopAmbientMusic() {
-  if (bellTimer !== null) {
-    clearTimeout(bellTimer);
-    bellTimer = null;
-  }
   if (!ctx || !master) return;
   const c = ctx;
   const m = master;
