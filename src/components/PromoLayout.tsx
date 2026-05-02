@@ -16,12 +16,8 @@ export function PromoLayout({ children }: { children: React.ReactNode }) {
   return (
     <div dir="rtl" className="promo-theme min-h-screen">
       <header className="sticky top-0 z-40 backdrop-blur-md bg-[oklch(0.99_0.01_340/0.75)] border-b border-[oklch(0.85_0.06_320/0.4)]">
-        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <span className="font-display text-lg text-[oklch(0.35_0.12_320)]">Luna tales</span>
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-1">
+        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between flex-row-reverse">
+          <nav className="hidden md:flex items-center gap-1 flex-row-reverse">
             {navLinks.map((l) => {
               const active = pathname === l.to;
               return (
@@ -40,7 +36,7 @@ export function PromoLayout({ children }: { children: React.ReactNode }) {
             })}
             <Link
               to="/app"
-              className="mr-2 px-5 py-2 rounded-full text-sm font-semibold bg-gradient-to-l from-[oklch(0.65_0.18_320)] to-[oklch(0.75_0.13_290)] text-white shadow-lg shadow-[oklch(0.7_0.14_315/0.35)] hover:shadow-xl hover:scale-105 transition-all"
+              className="ml-2 px-5 py-2 rounded-full text-sm font-semibold bg-gradient-to-l from-[oklch(0.65_0.18_320)] to-[oklch(0.75_0.13_290)] text-white shadow-lg shadow-[oklch(0.7_0.14_315/0.35)] hover:shadow-xl hover:scale-105 transition-all"
             >
               צור סיפור ✨
             </Link>

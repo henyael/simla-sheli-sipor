@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PromoLayout } from "@/components/PromoLayout";
-import heroImage from "@/assets/promo-hero.jpg";
+import heroImage from "@/assets/luna-tales-logo.png";
 
 export const Route = createFileRoute("/")({
   component: PromoHome,
