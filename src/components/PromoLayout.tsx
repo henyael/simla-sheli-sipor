@@ -18,8 +18,7 @@ export function PromoLayout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-40 backdrop-blur-md bg-[oklch(0.99_0.01_340/0.75)] border-b border-[oklch(0.85_0.06_320/0.4)]">
         <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
-            <span className="text-2xl group-hover:rotate-12 transition-transform inline-block">🌙</span>
-            <span className="font-display text-lg text-[oklch(0.35_0.12_320)]">סיפורי לילה טוב</span>
+            <span className="font-display text-lg text-[oklch(0.35_0.12_320)]">Luna tales</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
@@ -88,8 +87,7 @@ export function PromoLayout({ children }: { children: React.ReactNode }) {
         <div className="mx-auto max-w-6xl px-5 py-10 grid sm:grid-cols-3 gap-8 text-sm">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xl">🌙</span>
-              <span className="font-display text-base text-[oklch(0.35_0.12_320)]">סיפורי לילה טוב</span>
+              <span className="font-display text-base text-[oklch(0.35_0.12_320)]">Luna tales</span>
             </div>
             <p className="text-[oklch(0.5_0.06_320)] leading-relaxed">
               סיפורים אישיים בעברית, בלחיצה אחת. עשויים באהבה עבור הורים וילדים.
