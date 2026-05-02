@@ -77,15 +77,12 @@ function PromoHome() {
                   "radial-gradient(circle at center, black 50%, transparent 72%)",
               }}
             />
-            {/* Falling stars */}
-            <span className="falling-star absolute top-0 left-[15%] text-2xl text-[oklch(0.75_0.15_85)]" style={{ animationDelay: "0s", animationDuration: "4s" }}>✦</span>
-            <span className="falling-star absolute top-0 right-[10%] text-xl text-[oklch(0.7_0.18_320)]" style={{ animationDelay: "1.2s", animationDuration: "4.5s" }}>✧</span>
-            <span className="falling-star absolute top-0 right-[30%] text-lg text-[oklch(0.78_0.14_85)]" style={{ animationDelay: "0.6s", animationDuration: "3.8s" }}>★</span>
-            <span className="falling-star absolute top-0 left-[5%] text-xl text-[oklch(0.7_0.16_290)]" style={{ animationDelay: "2s", animationDuration: "4.2s" }}>✦</span>
-            <span className="falling-star absolute top-0 right-[45%] text-2xl text-[oklch(0.75_0.15_85)]" style={{ animationDelay: "2.8s", animationDuration: "5s" }}>✧</span>
-            <span className="falling-star absolute top-0 left-[35%] text-base text-[oklch(0.72_0.17_320)]" style={{ animationDelay: "3.4s", animationDuration: "4s" }}>★</span>
-            <span className="falling-star absolute top-0 right-[20%] text-lg text-[oklch(0.78_0.14_85)]" style={{ animationDelay: "1.8s", animationDuration: "4.6s" }}>✦</span>
-            <span className="falling-star absolute top-0 left-[50%] text-sm text-[oklch(0.7_0.18_290)]" style={{ animationDelay: "0.3s", animationDuration: "3.6s" }}>✧</span>
+            {/* Shooting stars with trailing tail */}
+            <span className="shoot-local" style={{ top: "10%", right: "5%", animationDelay: "0s", animationDuration: "6s" }} />
+            <span className="shoot-local" style={{ top: "30%", right: "15%", animationDelay: "2.5s", animationDuration: "7s" }} />
+            <span className="shoot-local" style={{ top: "55%", right: "0%", animationDelay: "4.2s", animationDuration: "6.5s" }} />
+            <span className="shoot-local" style={{ top: "70%", right: "25%", animationDelay: "1.3s", animationDuration: "7.5s" }} />
+            <span className="shoot-local" style={{ top: "20%", right: "40%", animationDelay: "5.5s", animationDuration: "6s" }} />
           </div>
         </div>
       </section>
