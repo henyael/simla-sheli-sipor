@@ -18,10 +18,9 @@ export const Route = createFileRoute("/app")({
       { title: "סיפורי לילה טוב | יוצר סיפורים אישיים לילדים" },
       {
         name: "description",
-        content:
-          "אפליקציה להורים: צרו סיפורי לילה טוב מותאמים אישית בעברית, עם איורים, מוזיקה רכה והקראה.",
+        content: "אפליקציה להורים: צרו סיפורי לילה טוב מותאמים אישית בעברית, עם איורים, מוזיקה רכה והקראה.",
       },
-      { property: "og:title", content: "סיפורי לילה טוב" },
+      { property: "og:title", content: "Luna tales" },
       {
         property: "og:description",
         content: "סיפורים בעברית מותאמים לכל ילד, רגועים וקסומים.",
@@ -116,9 +115,7 @@ function Home() {
       <div className="relative z-10 mx-auto max-w-xl px-5 py-10 sm:py-16">
         <header className="text-center mb-10 fade-up">
           <div className="text-5xl mb-3 float-slow inline-block">🌙</div>
-          <h1 className="font-display text-4xl sm:text-5xl text-primary mb-3 leading-tight">
-            סיפורי לילה טוב
-          </h1>
+          <h1 className="font-display text-4xl sm:text-5xl text-primary mb-3 leading-tight">סיפורי לילה טוב</h1>
           <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
             סיפור אישי, חם ושקט — בדיוק כמו שאתם הייתם מספרים.
           </p>
@@ -211,40 +208,30 @@ function Home() {
 
           {/* Optional magic */}
           <div className="space-y-3 rounded-2xl border border-border bg-input/20 p-4">
-            <div className="text-sm font-medium text-foreground/90 mb-1">
-              ✨ תוספות קסומות
-            </div>
+            <div className="text-sm font-medium text-foreground/90 mb-1">✨ תוספות קסומות</div>
 
             <label className="flex items-center justify-between gap-3 cursor-pointer py-1">
               <div className="text-sm">
                 <div className="font-medium">איור לכל עמוד</div>
-                <div className="text-xs text-muted-foreground">
-                  ציורי מים רכים שנוצרים במיוחד לסיפור
-                </div>
+                <div className="text-xs text-muted-foreground">ציורי מים רכים שנוצרים במיוחד לסיפור</div>
               </div>
               <Switch checked={withImages} onCheckedChange={setWithImages} />
             </label>
 
-            <label className={`flex items-center justify-between gap-3 cursor-pointer py-1 ${!withImages ? "opacity-50" : ""}`}>
+            <label
+              className={`flex items-center justify-between gap-3 cursor-pointer py-1 ${!withImages ? "opacity-50" : ""}`}
+            >
               <div className="text-sm">
                 <div className="font-medium">אנימציה לציורים</div>
-                <div className="text-xs text-muted-foreground">
-                  זום וריחוף עדינים על האיורים (Ken Burns)
-                </div>
+                <div className="text-xs text-muted-foreground">זום וריחוף עדינים על האיורים (Ken Burns)</div>
               </div>
-              <Switch
-                checked={withAnimation && withImages}
-                onCheckedChange={setWithAnimation}
-                disabled={!withImages}
-              />
+              <Switch checked={withAnimation && withImages} onCheckedChange={setWithAnimation} disabled={!withImages} />
             </label>
 
             <label className="flex items-center justify-between gap-3 cursor-pointer py-1">
               <div className="text-sm">
                 <div className="font-medium">מוזיקה רכה ברקע</div>
-                <div className="text-xs text-muted-foreground">
-                  צלילי רוגע עדינים בזמן הקריאה
-                </div>
+                <div className="text-xs text-muted-foreground">צלילי רוגע עדינים בזמן הקריאה</div>
               </div>
               <Switch checked={withMusic} onCheckedChange={setWithMusic} />
             </label>
@@ -252,9 +239,7 @@ function Home() {
             <label className="flex items-center justify-between gap-3 cursor-pointer py-1">
               <div className="text-sm">
                 <div className="font-medium">הקראת הסיפור</div>
-                <div className="text-xs text-muted-foreground">
-                  הדפדפן יקריא את הטקסט בקול עברי
-                </div>
+                <div className="text-xs text-muted-foreground">הדפדפן יקריא את הטקסט בקול עברי</div>
               </div>
               <Switch checked={withTTS} onCheckedChange={setWithTTS} />
             </label>
@@ -271,20 +256,11 @@ function Home() {
             disabled={loading}
             className="w-full h-13 py-4 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl shadow-lg smooth"
           >
-            {loading
-              ? withImages
-                ? "רוקמים סיפור ומציירים... ✨"
-                : "רוקמים סיפור..."
-              : "צור סיפור ✨"}
+            {loading ? (withImages ? "רוקמים סיפור ומציירים... ✨" : "רוקמים סיפור...") : "צור סיפור ✨"}
           </Button>
 
           {story && !reading && (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setReading(true)}
-              className="w-full smooth"
-            >
+            <Button type="button" variant="ghost" onClick={() => setReading(true)} className="w-full smooth">
               קרא שוב את "{story.title}"
             </Button>
           )}
