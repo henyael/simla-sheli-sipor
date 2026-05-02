@@ -15,7 +15,7 @@ export function PromoLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div dir="rtl" className="promo-theme min-h-screen">
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-[oklch(0.99_0.01_340/0.75)] border-b border-[oklch(0.85_0.06_320/0.4)]">
+      <header className="sticky top-0 z-40 backdrop-blur-md bg-white/90 border-b border-[oklch(0.92_0.03_320/0.5)]">
         <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-start">
           <button
             type="button"
