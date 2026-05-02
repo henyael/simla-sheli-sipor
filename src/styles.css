@@ -458,3 +458,34 @@ a.smooth:active {
     animation: none !important;
   }
 }
+
+/* Falling star animation */
+@keyframes falling-star {
+  0% {
+    opacity: 0;
+    transform: translate(0, -40px) rotate(0deg) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-60px, 140px) rotate(45deg) scale(1);
+  }
+}
+
+.falling-star {
+  display: inline-block;
+  animation: falling-star 4s linear infinite;
+  filter: drop-shadow(0 0 4px oklch(0.85 0.15 85 / 0.7));
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .falling-star {
+    animation: none !important;
+  }
+}

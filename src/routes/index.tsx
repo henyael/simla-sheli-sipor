@@ -77,15 +77,15 @@ function PromoHome() {
                   "radial-gradient(circle at center, black 50%, transparent 72%)",
               }}
             />
-            {/* Decorative twinkling stars */}
-            <span className="absolute top-[8%] left-[12%] text-2xl text-[oklch(0.75_0.15_85)] animate-pulse" style={{ animationDuration: "2.5s" }}>✦</span>
-            <span className="absolute top-[18%] right-[8%] text-xl text-[oklch(0.7_0.18_320)] animate-pulse" style={{ animationDuration: "3s", animationDelay: "0.4s" }}>✧</span>
-            <span className="absolute top-[4%] right-[28%] text-lg text-[oklch(0.78_0.14_85)] animate-pulse" style={{ animationDuration: "2.2s", animationDelay: "0.8s" }}>★</span>
-            <span className="absolute bottom-[14%] left-[6%] text-xl text-[oklch(0.7_0.16_290)] animate-pulse" style={{ animationDuration: "2.8s", animationDelay: "0.2s" }}>✦</span>
-            <span className="absolute bottom-[8%] right-[14%] text-2xl text-[oklch(0.75_0.15_85)] animate-pulse" style={{ animationDuration: "3.2s", animationDelay: "1s" }}>✧</span>
-            <span className="absolute top-[42%] left-[2%] text-base text-[oklch(0.72_0.17_320)] animate-pulse" style={{ animationDuration: "2.6s", animationDelay: "0.6s" }}>★</span>
-            <span className="absolute top-[55%] right-[2%] text-lg text-[oklch(0.78_0.14_85)] animate-pulse" style={{ animationDuration: "2.4s", animationDelay: "1.2s" }}>✦</span>
-            <span className="absolute bottom-[28%] right-[28%] text-sm text-[oklch(0.7_0.18_290)] animate-pulse" style={{ animationDuration: "3s", animationDelay: "0.3s" }}>✧</span>
+            {/* Falling stars */}
+            <span className="falling-star absolute top-0 left-[15%] text-2xl text-[oklch(0.75_0.15_85)]" style={{ animationDelay: "0s", animationDuration: "4s" }}>✦</span>
+            <span className="falling-star absolute top-0 right-[10%] text-xl text-[oklch(0.7_0.18_320)]" style={{ animationDelay: "1.2s", animationDuration: "4.5s" }}>✧</span>
+            <span className="falling-star absolute top-0 right-[30%] text-lg text-[oklch(0.78_0.14_85)]" style={{ animationDelay: "0.6s", animationDuration: "3.8s" }}>★</span>
+            <span className="falling-star absolute top-0 left-[5%] text-xl text-[oklch(0.7_0.16_290)]" style={{ animationDelay: "2s", animationDuration: "4.2s" }}>✦</span>
+            <span className="falling-star absolute top-0 right-[45%] text-2xl text-[oklch(0.75_0.15_85)]" style={{ animationDelay: "2.8s", animationDuration: "5s" }}>✧</span>
+            <span className="falling-star absolute top-0 left-[35%] text-base text-[oklch(0.72_0.17_320)]" style={{ animationDelay: "3.4s", animationDuration: "4s" }}>★</span>
+            <span className="falling-star absolute top-0 right-[20%] text-lg text-[oklch(0.78_0.14_85)]" style={{ animationDelay: "1.8s", animationDuration: "4.6s" }}>✦</span>
+            <span className="falling-star absolute top-0 left-[50%] text-sm text-[oklch(0.7_0.18_290)]" style={{ animationDelay: "0.3s", animationDuration: "3.6s" }}>✧</span>
           </div>
         </div>
       </section>
