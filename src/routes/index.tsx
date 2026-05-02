@@ -1,315 +1,154 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { generateStory, type StoryPage } from "@/server/generate-story";
-import { getDeviceSupabase } from "@/lib/supabase-device";
-import { StoryReader } from "@/components/StoryReader";
-import { CosmicBackground } from "@/components/CosmicBackground";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { PromoLayout } from "@/components/PromoLayout";
+import heroImage from "@/assets/promo-hero.jpg";
 
 export const Route = createFileRoute("/")({
-  component: Home,
+  component: PromoHome,
   head: () => ({
     meta: [
-      { title: "סיפורי לילה טוב | יוצר סיפורים אישיים לילדים" },
+      { title: "סיפורי לילה טוב | סיפור אישי לילד שלכם בלחיצה אחת" },
       {
         name: "description",
         content:
-          "אפליקציה להורים: צרו סיפורי לילה טוב מותאמים אישית בעברית, עם איורים, מוזיקה רכה והקראה.",
+          "אפליקציה חינמית להורים: יוצרים סיפור לילה טוב מותאם אישית בעברית, עם איורים, מוזיקה רכה והקראה — בלחיצה אחת.",
       },
-      { property: "og:title", content: "סיפורי לילה טוב" },
+      { property: "og:title", content: "סיפורי לילה טוב — סיפור אישי לכל ילד" },
       {
         property: "og:description",
-        content: "סיפורים בעברית מותאמים לכל ילד, רגועים וקסומים.",
+        content: "סיפורים בעברית, מותאמים לילד שלכם. רגועים, קסומים ומוכנים תוך שניות.",
       },
     ],
   }),
 });
 
-type Length = "short" | "medium" | "long";
-type Sentiment = "magical" | "inspiring" | "learning";
-
-const lengthOptions: { value: Length; label: string; sub: string }[] = [
-  { value: "short", label: "קצר", sub: "1–3 דקות" },
-  { value: "medium", label: "בינוני", sub: "3–5 דקות" },
-  { value: "long", label: "ארוך", sub: "5–10 דקות" },
-];
-
-const sentimentOptions: { value: Sentiment; label: string; emoji: string }[] = [
-  { value: "magical", label: "קסום", emoji: "✨" },
-  { value: "inspiring", label: "מעורר השראה", emoji: "🌟" },
-  { value: "learning", label: "עם לקח", emoji: "🌱" },
-];
-
-function Home() {
-  const generate = useServerFn(generateStory);
-
-  const [childName, setChildName] = useState("");
-  const [topic, setTopic] = useState("");
-  const [length, setLength] = useState<Length>("medium");
-  const [sentiment, setSentiment] = useState<Sentiment>("magical");
-
-  // Optional features
-  const [withImages, setWithImages] = useState(true);
-  const [withAnimation, setWithAnimation] = useState(false);
-  const [withMusic, setWithMusic] = useState(true);
-  const [withTTS, setWithTTS] = useState(false);
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [story, setStory] = useState<{
-    title: string;
-    pages: StoryPage[];
-    character_sheet?: string;
-  } | null>(null);
-  const [reading, setReading] = useState(false);
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!childName.trim() || !topic.trim()) {
-      setError("נא למלא את שם הילד ורעיון לסיפור.");
-      return;
-    }
-    setLoading(true);
-    setStory(null);
-    try {
-      const result = await generate({
-        data: {
-          childName: childName.trim(),
-          topic: topic.trim(),
-          length,
-          sentiment,
-        },
-      });
-      setStory(result);
-      setReading(true);
-
-      // Save to library (best-effort, no auth)
-      const sb = getDeviceSupabase();
-      const insertRow = {
-        device_id: localStorage.getItem("bedtime.device_id") ?? "",
-        child_name: childName.trim(),
-        topic: topic.trim(),
-        length: length as string,
-        sentiment: sentiment as string,
-        title: result.title,
-        pages: result.pages as unknown,
-      };
-      await sb.from("stories").insert(insertRow as never);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "שגיאה לא ידועה";
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+function PromoHome() {
   return (
-    <div dir="rtl" className="relative min-h-screen">
-      <CosmicBackground />
+    <PromoLayout>
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-bl from-[oklch(0.96_0.04_340)] via-[oklch(0.95_0.05_320)] to-[oklch(0.92_0.07_295)] -z-10" />
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:py-24 grid md:grid-cols-2 gap-10 items-center">
+          <div className="text-center md:text-right">
+            <span className="inline-block mb-5 px-4 py-1.5 rounded-full bg-white/70 border border-[oklch(0.8_0.1_320)] text-xs font-medium text-[oklch(0.5_0.15_320)]">
+              ✨ חינם · ללא הרשמה · בעברית
+            </span>
+            <h1 className="font-display text-4xl sm:text-6xl leading-tight text-[oklch(0.3_0.12_320)] mb-5">
+              סיפור לילה טוב
+              <br />
+              <span className="bg-gradient-to-l from-[oklch(0.55_0.2_320)] to-[oklch(0.65_0.16_280)] bg-clip-text text-transparent">
+                שנכתב במיוחד עבורם
+              </span>
+            </h1>
+            <p className="text-lg text-[oklch(0.4_0.06_320)] leading-relaxed mb-8 max-w-lg mx-auto md:mx-0">
+              ספרו לנו את שם הילד ועל מה הוא רוצה לחלום — ותוך שניות יקום סיפור עברי מקורי, עם איורים רכים, מוזיקה לפני השינה והקראה בקול.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+              <Link
+                to="/app"
+                className="px-8 py-4 rounded-full text-base font-semibold bg-gradient-to-l from-[oklch(0.6_0.2_320)] to-[oklch(0.7_0.15_290)] text-white shadow-xl shadow-[oklch(0.6_0.2_320/0.35)] hover:scale-105 hover:shadow-2xl transition-all"
+              >
+                צרו סיפור עכשיו ✨
+              </Link>
+              <Link
+                to="/stories"
+                className="px-8 py-4 rounded-full text-base font-medium bg-white/80 text-[oklch(0.4_0.1_320)] border border-[oklch(0.8_0.08_320)] hover:bg-white transition-all"
+              >
+                ראו סיפורי הורים
+              </Link>
+            </div>
+            <div className="mt-8 flex items-center justify-center md:justify-start gap-6 text-xs text-[oklch(0.5_0.06_320)]">
+              <div className="flex items-center gap-1.5"><span>⭐⭐⭐⭐⭐</span><span>מאהבים את זה</span></div>
+              <div>🌙 מעל 10,000 סיפורים</div>
+            </div>
+          </div>
 
-      <div className="relative z-10 mx-auto max-w-xl px-5 py-10 sm:py-16">
-        <header className="text-center mb-10 fade-up">
-          <div className="text-5xl mb-3 float-slow inline-block">🌙</div>
-          <h1 className="font-display text-4xl sm:text-5xl text-primary mb-3 leading-tight">
-            סיפורי לילה טוב
-          </h1>
-          <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-            סיפור אישי, חם ושקט — בדיוק כמו שאתם הייתם מספרים.
+          <div className="relative">
+            <div className="absolute -inset-6 bg-gradient-to-br from-[oklch(0.85_0.13_320/0.5)] to-[oklch(0.8_0.13_270/0.4)] blur-3xl rounded-full -z-10" />
+            <img
+              src={heroImage}
+              alt="הורה וילד קוראים סיפור לפני השינה"
+              width={1024}
+              height={1024}
+              className="rounded-3xl shadow-2xl shadow-[oklch(0.5_0.18_320/0.35)] border-4 border-white/60"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="mx-auto max-w-6xl px-5 py-16 sm:py-24">
+        <div className="text-center mb-12">
+          <h2 className="font-display text-3xl sm:text-4xl text-[oklch(0.3_0.12_320)] mb-3">
+            כל מה שצריך לרגע מושלם לפני השינה
+          </h2>
+          <p className="text-[oklch(0.45_0.06_320)] max-w-xl mx-auto">
+            לא עוד חיפוש סיפורים מתאימים. כל סיפור מותאם בדיוק לילד שלכם, ברגע.
+          </p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[
+            { icon: "✍️", title: "סיפור אישי", text: "שם הילד, נושא שאוהב, ערך שחשוב לכם — ומקבלים סיפור מקורי שלא קראתם בשום מקום." },
+            { icon: "🎨", title: "איורים רכים", text: "כל עמוד מקבל ציור מים בסגנון ילדים, עם דמות עקבית לכל אורך הסיפור." },
+            { icon: "🎵", title: "מוזיקה רכה", text: "פסקול שקט מתנגן ברקע — בדיוק בעוצמה של לחישה לפני שינה." },
+            { icon: "🗣️", title: "הקראה בעברית", text: "אפשר לשבת לצד הילד ולתת לדפדפן להקריא בקול עברי נעים." },
+            { icon: "⏱️", title: "אורך שמתאים", text: "קצר, בינוני או ארוך — אתם בוחרים כמה זמן יש לכם הערב." },
+            { icon: "💜", title: "חינם לגמרי", text: "ללא הרשמה, ללא תשלום, ללא פרסומות. פשוט פותחים ויוצרים." },
+          ].map((f) => (
+            <div
+              key={f.title}
+              className="p-6 rounded-3xl bg-white/80 border border-[oklch(0.88_0.05_320)] hover:border-[oklch(0.75_0.13_315)] hover:shadow-xl hover:shadow-[oklch(0.7_0.14_315/0.15)] hover:-translate-y-1 transition-all"
+            >
+              <div className="text-4xl mb-3">{f.icon}</div>
+              <h3 className="font-display text-xl text-[oklch(0.3_0.12_320)] mb-2">{f.title}</h3>
+              <p className="text-sm text-[oklch(0.45_0.06_320)] leading-relaxed">{f.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="bg-gradient-to-b from-[oklch(0.97_0.03_330)] to-[oklch(0.94_0.06_310)] py-16 sm:py-24">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="text-center mb-12">
+            <h2 className="font-display text-3xl sm:text-4xl text-[oklch(0.3_0.12_320)] mb-3">
+              איך זה עובד?
+            </h2>
+            <p className="text-[oklch(0.45_0.06_320)]">שלושה צעדים, פחות מדקה.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { n: "1", title: "ספרו לנו על הילד", text: "הקלידו את השם של הילד ורעיון לסיפור — דובי שמחפש את הירח, ילדה אמיצה שמטפסת על הר…" },
+              { n: "2", title: "בחרו את הקסם", text: "אורך, סגנון, איורים, מוזיקה והקראה — סמנו את מה שאתם רוצים הערב." },
+              { n: "3", title: "תהנו ביחד", text: "תוך שניות הסיפור מוכן. שבו לצד המיטה, פתחו את העמוד הראשון, ותיתנו לעיניים להישכר." },
+            ].map((s) => (
+              <div key={s.n} className="relative p-6 rounded-3xl bg-white/80 border border-[oklch(0.88_0.05_320)]">
+                <div className="absolute -top-5 right-6 w-10 h-10 rounded-full bg-gradient-to-br from-[oklch(0.6_0.2_320)] to-[oklch(0.7_0.15_280)] text-white font-bold flex items-center justify-center shadow-lg">
+                  {s.n}
+                </div>
+                <h3 className="font-display text-xl text-[oklch(0.3_0.12_320)] mb-2 mt-2">{s.title}</h3>
+                <p className="text-sm text-[oklch(0.45_0.06_320)] leading-relaxed">{s.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="mx-auto max-w-4xl px-5 py-16 sm:py-24 text-center">
+        <div className="rounded-[2.5rem] p-10 sm:p-16 bg-gradient-to-br from-[oklch(0.55_0.2_320)] via-[oklch(0.6_0.18_295)] to-[oklch(0.65_0.15_270)] text-white shadow-2xl shadow-[oklch(0.6_0.2_320/0.4)]">
+          <div className="text-5xl mb-4">🌙</div>
+          <h2 className="font-display text-3xl sm:text-4xl mb-3">הלילה הקרוב מחכה לסיפור</h2>
+          <p className="opacity-90 mb-8 max-w-md mx-auto">
+            בלי הרשמה. בלי תשלום. רק שם, רעיון — וקסם.
           </p>
           <Link
-            to="/library"
-            className="group relative inline-flex items-center gap-2 mt-5 px-5 py-2.5 rounded-full border border-accent/40 bg-accent/10 text-accent font-medium text-sm smooth hover:bg-accent/20 hover:border-accent/70 hover:scale-105 hover:shadow-[0_0_25px_oklch(0.78_0.14_250/0.4)] active:scale-95"
+            to="/app"
+            className="inline-block px-10 py-4 rounded-full text-base font-bold bg-white text-[oklch(0.4_0.18_320)] hover:scale-105 hover:shadow-2xl transition-all"
           >
-            <span className="text-base group-hover:rotate-6 smooth inline-block">📚</span>
-            <span>הספרייה שלי</span>
-            <span className="text-xs opacity-70 group-hover:-translate-x-1 smooth inline-block">←</span>
+            התחילו סיפור עכשיו ✨
           </Link>
-        </header>
-
-        <form
-          onSubmit={onSubmit}
-          className="rounded-3xl border border-border bg-card backdrop-blur-md shadow-2xl p-6 sm:p-8 space-y-6 fade-up"
-        >
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-base font-medium">
-              שם הילד/ה
-            </Label>
-            <Input
-              id="name"
-              value={childName}
-              onChange={(e) => setChildName(e.target.value)}
-              placeholder="למשל: נעמה"
-              maxLength={40}
-              dir="rtl"
-              className="h-12 text-base bg-input/40 border-border rounded-xl smooth text-right"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="topic" className="text-base font-medium">
-              על מה הסיפור?
-            </Label>
-            <Textarea
-              id="topic"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="למשל: דובי קטן שמחפש את הירח"
-              maxLength={200}
-              rows={3}
-              dir="rtl"
-              className="text-base bg-input/40 border-border resize-none rounded-xl smooth text-right"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-base font-medium">אורך הסיפור</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {lengthOptions.map((o) => (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => setLength(o.value)}
-                  className={`rounded-2xl border p-3 text-center smooth ${
-                    length === o.value
-                      ? "border-primary bg-primary/15 text-primary scale-[1.02]"
-                      : "border-border bg-input/30 text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <div className="font-semibold">{o.label}</div>
-                  <div className="text-xs opacity-80 mt-0.5">{o.sub}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-base font-medium">סגנון</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {sentimentOptions.map((o) => (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => setSentiment(o.value)}
-                  className={`rounded-2xl border p-3 text-center smooth ${
-                    sentiment === o.value
-                      ? "border-accent bg-accent/15 text-accent scale-[1.02]"
-                      : "border-border bg-input/30 text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <div className="text-2xl">{o.emoji}</div>
-                  <div className="text-sm mt-1 font-medium">{o.label}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Optional magic */}
-          <div className="space-y-3 rounded-2xl border border-border bg-input/20 p-4">
-            <div className="text-sm font-medium text-foreground/90 mb-1">
-              ✨ תוספות קסומות
-            </div>
-
-            <label className="flex items-center justify-between gap-3 cursor-pointer py-1">
-              <div className="text-sm">
-                <div className="font-medium">איור לכל עמוד</div>
-                <div className="text-xs text-muted-foreground">
-                  ציורי מים רכים שנוצרים במיוחד לסיפור
-                </div>
-              </div>
-              <Switch checked={withImages} onCheckedChange={setWithImages} />
-            </label>
-
-            <label className={`flex items-center justify-between gap-3 cursor-pointer py-1 ${!withImages ? "opacity-50" : ""}`}>
-              <div className="text-sm">
-                <div className="font-medium">אנימציה לציורים</div>
-                <div className="text-xs text-muted-foreground">
-                  זום וריחוף עדינים על האיורים (Ken Burns)
-                </div>
-              </div>
-              <Switch
-                checked={withAnimation && withImages}
-                onCheckedChange={setWithAnimation}
-                disabled={!withImages}
-              />
-            </label>
-
-            <label className="flex items-center justify-between gap-3 cursor-pointer py-1">
-              <div className="text-sm">
-                <div className="font-medium">מוזיקה רכה ברקע</div>
-                <div className="text-xs text-muted-foreground">
-                  צלילי רוגע עדינים בזמן הקריאה
-                </div>
-              </div>
-              <Switch checked={withMusic} onCheckedChange={setWithMusic} />
-            </label>
-
-            <label className="flex items-center justify-between gap-3 cursor-pointer py-1">
-              <div className="text-sm">
-                <div className="font-medium">הקראת הסיפור</div>
-                <div className="text-xs text-muted-foreground">
-                  הדפדפן יקריא את הטקסט בקול עברי
-                </div>
-              </div>
-              <Switch checked={withTTS} onCheckedChange={setWithTTS} />
-            </label>
-          </div>
-
-          {error && (
-            <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive-foreground">
-              {error}
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full h-13 py-4 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl shadow-lg smooth"
-          >
-            {loading
-              ? withImages
-                ? "רוקמים סיפור ומציירים... ✨"
-                : "רוקמים סיפור..."
-              : "צור סיפור ✨"}
-          </Button>
-
-          {story && !reading && (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setReading(true)}
-              className="w-full smooth"
-            >
-              קרא שוב את "{story.title}"
-            </Button>
-          )}
-        </form>
-
-        <footer className="mt-10 text-center text-xs text-muted-foreground/70">
-          לחישה לפני השינה · בעברית · ללא הרשמה
-        </footer>
-      </div>
-
-      {story && reading && (
-        <StoryReader
-          title={story.title}
-          pages={story.pages}
-          autoMusic={withMusic}
-          withImages={withImages}
-          withAnimation={withAnimation && withImages}
-          styleAnchor={
-            story.character_sheet ||
-            `Main character: a child named ${childName.trim()}. Story idea: ${topic.trim()}. Keep this same character's appearance (clothing, hair, body) on every page.`
-          }
-          onClose={() => setReading(false)}
-          key={withTTS ? "tts" : "no-tts"}
-        />
-      )}
-    </div>
+        </div>
+      </section>
+    </PromoLayout>
   );
 }

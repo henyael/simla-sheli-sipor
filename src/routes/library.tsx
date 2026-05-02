@@ -60,7 +60,7 @@ function LibraryPage() {
           <h1 className="font-display text-3xl sm:text-4xl text-primary">
             הספרייה שלי 📚
           </h1>
-          <Link to="/">
+          <Link to="/app">
             <Button variant="ghost">← חזרה</Button>
           </Link>
         </div>
@@ -79,7 +79,7 @@ function LibraryPage() {
           <div className="text-center text-muted-foreground py-16 fade-up">
             <div className="text-5xl mb-4">🌙</div>
             <p>עוד לא יצרתם סיפורים.</p>
-            <Link to="/" className="inline-block mt-4">
+            <Link to="/app" className="inline-block mt-4">
               <Button>צרו את הסיפור הראשון</Button>
             </Link>
           </div>
