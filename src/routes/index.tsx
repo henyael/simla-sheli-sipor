@@ -62,14 +62,20 @@ function PromoHome() {
             </div>
           </div>
 
-          <div className="relative">
-            <div className="absolute -inset-6 bg-gradient-to-br from-[oklch(0.85_0.13_320/0.5)] to-[oklch(0.8_0.13_270/0.4)] blur-3xl rounded-full -z-10" />
+          <div className="relative flex items-center justify-center">
+            <div className="absolute inset-0 bg-gradient-to-br from-[oklch(0.85_0.13_320/0.5)] to-[oklch(0.8_0.13_270/0.4)] blur-3xl rounded-full -z-10" />
             <img
               src={heroImage}
               alt="הורה וילד קוראים סיפור לפני השינה"
               width={1024}
               height={1024}
-              className="rounded-3xl shadow-2xl shadow-[oklch(0.5_0.18_320/0.35)] border-4 border-white/60"
+              className="w-full max-w-md aspect-square object-cover rounded-full"
+              style={{
+                WebkitMaskImage:
+                  "radial-gradient(circle at center, black 50%, transparent 72%)",
+                maskImage:
+                  "radial-gradient(circle at center, black 50%, transparent 72%)",
+              }}
             />
           </div>
         </div>

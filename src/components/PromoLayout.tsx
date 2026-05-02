@@ -16,51 +16,27 @@ export function PromoLayout({ children }: { children: React.ReactNode }) {
   return (
     <div dir="rtl" className="promo-theme min-h-screen">
       <header className="sticky top-0 z-40 backdrop-blur-md bg-[oklch(0.99_0.01_340/0.75)] border-b border-[oklch(0.85_0.06_320/0.4)]">
-        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between flex-row-reverse">
-          <nav className="hidden md:flex items-center gap-1 flex-row-reverse">
-            {navLinks.map((l) => {
-              const active = pathname === l.to;
-              return (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    active
-                      ? "bg-[oklch(0.7_0.14_315)] text-white"
-                      : "text-[oklch(0.4_0.1_320)] hover:bg-[oklch(0.92_0.05_330)]"
-                  }`}
-                >
-                  {l.label}
-                </Link>
-              );
-            })}
-            <Link
-              to="/app"
-              className="ml-2 px-5 py-2 rounded-full text-sm font-semibold bg-gradient-to-l from-[oklch(0.65_0.18_320)] to-[oklch(0.75_0.13_290)] text-white shadow-lg shadow-[oklch(0.7_0.14_315/0.35)] hover:shadow-xl hover:scale-105 transition-all"
-            >
-              צור סיפור ✨
-            </Link>
-          </nav>
-
+        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-end">
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="md:hidden p-2 rounded-lg text-[oklch(0.35_0.12_320)] hover:bg-[oklch(0.92_0.05_330)]"
+            className="p-2.5 rounded-full text-[oklch(0.35_0.12_320)] bg-white/70 border border-[oklch(0.85_0.06_320/0.6)] hover:bg-white hover:shadow-md transition-all"
             aria-label="תפריט"
+            aria-expanded={open}
           >
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
         {open && (
-          <div className="md:hidden border-t border-[oklch(0.85_0.06_320/0.4)] bg-[oklch(0.99_0.01_340)]">
-            <nav className="flex flex-col p-3 gap-1">
+          <div className="border-t border-[oklch(0.85_0.06_320/0.4)] bg-[oklch(0.99_0.01_340)]">
+            <nav className="mx-auto max-w-6xl flex flex-col p-3 gap-1 items-end">
               {navLinks.map((l) => (
                 <Link
                   key={l.to}
                   to={l.to}
                   onClick={() => setOpen(false)}
-                  className="px-4 py-3 rounded-xl text-sm font-medium text-[oklch(0.4_0.1_320)] hover:bg-[oklch(0.92_0.05_330)]"
+                  className="w-full text-right px-4 py-3 rounded-xl text-sm font-medium text-[oklch(0.4_0.1_320)] hover:bg-[oklch(0.92_0.05_330)]"
                 >
                   {l.label}
                 </Link>
@@ -68,7 +44,7 @@ export function PromoLayout({ children }: { children: React.ReactNode }) {
               <Link
                 to="/app"
                 onClick={() => setOpen(false)}
-                className="mt-2 px-4 py-3 rounded-xl text-sm font-semibold bg-gradient-to-l from-[oklch(0.65_0.18_320)] to-[oklch(0.75_0.13_290)] text-white text-center"
+                className="w-full mt-2 px-4 py-3 rounded-xl text-sm font-semibold bg-gradient-to-l from-[oklch(0.65_0.18_320)] to-[oklch(0.75_0.13_290)] text-white text-center"
               >
                 צור סיפור ✨
               </Link>
