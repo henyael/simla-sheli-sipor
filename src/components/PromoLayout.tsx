@@ -19,7 +19,7 @@ export function PromoLayout({ children }: { children: React.ReactNode }) {
         <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
             <span className="text-2xl group-hover:rotate-12 transition-transform inline-block">🌙</span>
-            <span className="font-display text-lg text-[oklch(0.35_0.12_320)]">סיפוריייי לילה טוב</span>
+            <span className="font-display text-lg text-[oklch(0.35_0.12_320)]">סיפורי לילה טוב</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
