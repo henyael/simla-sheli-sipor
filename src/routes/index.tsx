@@ -147,8 +147,9 @@ function PromoHome() {
       <section className="bg-gradient-to-b from-[oklch(0.97_0.03_330)] to-[oklch(0.94_0.06_310)] py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-5">
           <div className="text-center mb-12">
-            <h2 className="font-display text-3xl sm:text-4xl text-[oklch(0.3_0.12_320)] mb-3">איך זה עובד?</h2>
-            <p className="text-[oklch(0.45_0.06_320)]">שלושה צעדים, פחות מדקה.</p>
+            <h2 className="font-display text-3xl sm:text-4xl text-[oklch(0.3_0.12_320)] mb-3">
+              יוצרים את הספר החדש ב-3 צעדים פשוטים?
+            </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
