@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PromoLayout } from "@/components/PromoLayout";
 import heroImage from "@/assets/luna-tales-logo.png";
+import step1Image from "@/assets/step-1.jpg";
+import step2Image from "@/assets/step-2.jpg";
+import step3Image from "@/assets/step-3.jpg";
 
 export const Route = createFileRoute("/")({
   component: PromoHome,
@@ -52,7 +55,7 @@ function PromoHome() {
               </Link>
               <Link
                 to="/stories"
-                className="px-8 py-4 rounded-full text-base font-medium bg-white/80 text-[oklch(0.4_0.1_320)] border border-[oklch(0.8_0.08_320)] hover:bg-white transition-all"
+                className="px-8 py-4 rounded-full text-base font-medium bg-white/80 text-[oklch(0.4_0.1_320)] border border-[oklch(0.8_0.08_320)] hover:bg-white hover:border-[oklch(0.7_0.14_315)] hover:text-[oklch(0.3_0.15_320)] hover:shadow-lg hover:-translate-y-0.5 transition-all"
               >
                 ראו סיפורי הורים
               </Link>
@@ -151,33 +154,89 @@ function PromoHome() {
               יוצרים את הספר החדש ב-3 צעדים פשוטים?
             </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 n: "1",
                 title: "ספרו לנו על הילד",
                 text: "הקלידו את השם של הילד ורעיון לסיפור — דובי שמחפש את הירח, ילדה אמיצה שמטפסת על הר…",
+                img: step1Image,
+                alt: "הורה וילד מקלידים שם בטאבלט",
               },
               {
                 n: "2",
                 title: "בחרו את הקסם",
                 text: "אורך, סגנון, איורים, מוזיקה והקראה — סמנו את מה שאתם רוצים הערב.",
+                img: step2Image,
+                alt: "ספר פתוח עם איורים מוזיקה וכוכבים",
               },
               {
                 n: "3",
                 title: "תהנו ביחד",
                 text: "תוך שניות הסיפור מוכן. שבו לצד המיטה, פתחו את העמוד הראשון, ותצללו לתוך הסיפור.",
+                img: step3Image,
+                alt: "ילדה קוראת ספר עם דובי לפני השינה",
               },
             ].map((s) => (
-              <div key={s.n} className="relative p-6 rounded-3xl bg-white/80 border border-[oklch(0.88_0.05_320)]">
-                <div className="absolute -top-5 right-6 w-10 h-10 rounded-full bg-gradient-to-br from-[oklch(0.6_0.2_320)] to-[oklch(0.7_0.15_280)] text-white font-bold flex items-center justify-center shadow-lg">
-                  {s.n}
+              <div
+                key={s.n}
+                className="relative rounded-3xl bg-white/80 border border-[oklch(0.88_0.05_320)] overflow-hidden hover:shadow-xl hover:shadow-[oklch(0.7_0.14_315/0.15)] hover:-translate-y-1 transition-all"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-[oklch(0.95_0.05_320)]">
+                  <img
+                    src={s.img}
+                    alt={s.alt}
+                    width={768}
+                    height={576}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute -bottom-5 right-6 w-12 h-12 rounded-full bg-gradient-to-br from-[oklch(0.6_0.2_320)] to-[oklch(0.7_0.15_280)] text-white font-bold text-lg flex items-center justify-center shadow-lg border-4 border-white">
+                    {s.n}
+                  </div>
                 </div>
-                <h3 className="font-display text-xl text-[oklch(0.3_0.12_320)] mb-2 mt-2">{s.title}</h3>
-                <p className="text-sm text-[oklch(0.45_0.06_320)] leading-relaxed">{s.text}</p>
+                <div className="p-6 pt-8">
+                  <h3 className="font-display text-xl text-[oklch(0.3_0.12_320)] mb-2">{s.title}</h3>
+                  <p className="text-sm text-[oklch(0.45_0.06_320)] leading-relaxed">{s.text}</p>
+                </div>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* FAQ teaser */}
+      <section className="mx-auto max-w-4xl px-5 py-16 sm:py-20">
+        <div className="text-center mb-10">
+          <span className="text-4xl">💬</span>
+          <h2 className="font-display text-3xl sm:text-4xl text-[oklch(0.3_0.12_320)] mt-3 mb-3">
+            שאלות נפוצות
+          </h2>
+          <p className="text-[oklch(0.45_0.06_320)]">התשובות הקצרות לכל מה שהורים שואלים אותנו.</p>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {[
+            { q: "כמה זה עולה?", a: "חינם לחלוטין. ללא תשלום, ללא פרסומות, ללא תקופת ניסיון." },
+            { q: "צריך להירשם?", a: "לא. בלי דוא\"ל ובלי סיסמה — נכנסים ויוצרים." },
+            { q: "באיזו שפה הסיפורים?", a: "עברית טבעית, נכתבת מאפס — לא תרגום. גם ההקראה בקול עברי." },
+            { q: "מה לגבי פרטיות הילדים?", a: "השם משמש רק ליצירת הסיפור. לא בונים פרופילים ולא מוכרים מידע." },
+          ].map((f) => (
+            <div
+              key={f.q}
+              className="p-5 rounded-2xl bg-white/80 border border-[oklch(0.88_0.05_320)] hover:border-[oklch(0.75_0.13_315)] transition-colors"
+            >
+              <h3 className="font-semibold text-[oklch(0.3_0.12_320)] mb-1.5">{f.q}</h3>
+              <p className="text-sm text-[oklch(0.45_0.06_320)] leading-relaxed">{f.a}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Link
+            to="/faq"
+            className="inline-block px-6 py-3 rounded-full text-sm font-medium bg-white/80 text-[oklch(0.4_0.1_320)] border border-[oklch(0.8_0.08_320)] hover:bg-white hover:border-[oklch(0.7_0.14_315)] hover:shadow-lg hover:-translate-y-0.5 transition-all"
+          >
+            לכל השאלות הנפוצות ←
+          </Link>
         </div>
       </section>
 
